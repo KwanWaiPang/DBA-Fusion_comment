@@ -83,9 +83,9 @@ if __name__ == '__main__':
 
     # 设置参数，原文通过执行batch_tumvi.py文件来设置参数
     parser = argparse.ArgumentParser()
-    parser.add_argument("--imagedir", type=str, help="path to image directory")
-    parser.add_argument("--imagestamp", type=str, help="")
-    parser.add_argument("--imupath", type=str, help="")
+    parser.add_argument("--imagedir", type=str, help="path to image directory") #图像数据的路径
+    parser.add_argument("--imagestamp", type=str, help="") #图像时间戳
+    parser.add_argument("--imupath", type=str, help="")# imu数据
     parser.add_argument("--gtpath", type=str, help="") #参考轨迹（真值）
 
     #当数据集较大时，可以将数据集存储为h5文件，加快读取速度？
