@@ -11,6 +11,7 @@
   <h3 align="center">
   <a href="https://arxiv.org/pdf/2403.13714">Paper</a> 
   | <a href="https://github.com/GREAT-WHU/DBA-Fusion">Original Github Page</a>
+  | <a href="https://kwanwaipang.github.io/File/Blogs/Poster/Learning_based_VO.html">Survey for Learning-based VO</a>
   </h3>
   <div align="center"></div>
 
@@ -35,4 +36,16 @@ pip install open3d # optional for visualization (这是可视化的，应该只�
 cd thirdparty
 git clone https://github.com/ZhouTangtang/gtsam.git
 cd gtsam
+<!-- rm -rf .git -->
+mkdir build
+cd build
+cmake .. -DGTSAM_BUILD_PYTHON=1 -DGTSAM_PYTHON_VERSION=3.10.11
+make python-install
 ~~~
+* 然后安装DBA-Fusion
+~~~
+cd 到DBA-Fusion目录
+python setup.py install
+~~~
+
+# 代码测试
