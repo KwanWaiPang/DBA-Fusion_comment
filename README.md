@@ -94,10 +94,13 @@ python evaluation_scripts/evaluate_tumvi.py --seq corridor1
 python evaluation_scripts/evaluate_tumvi.py --seq outdoors6
 ~~~
 
+长走廊测试。
 <div align=center>
 <img alt="" src="./assets/微信截图_20240710124351.png" width='90%' />
 </div>
 
+<br>
+室外大场景，最终没能回到原点，有较为明显的回环问题，但是场景尺度很大（大约40~50分钟），加入回环检测可以解决改问题。
 <div align=center>
 <img alt="" src="./assets/微信截图_20240710151319.png" width='90%' />
 </div>
@@ -123,5 +126,8 @@ ln -s /lib/x86_64-linux-gnu/dri/swrast_dri.so swrast_dri.so
  conda install -c conda-forge gcc
 ~~~
 * demo 视频见link<sup>
-[1]()
+[1](https://www.bilibili.com/video/BV1y1421b7ug/?vd_source=a88e426798937812a8ffc1a9be5a3cb7)
 </sup>.
+
+# 代码解读
+* demo_vio_tumvi.py

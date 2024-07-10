@@ -73,8 +73,10 @@ def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
             ccount += 1
             yield pickle.loads(np.array(h5_f[key]))
 
+# 主函数
 if __name__ == '__main__':
 
+    # 检查GPU是否可用，并打印GPU信息
     print(torch.cuda.device_count())
     print(torch.cuda.is_available())
     print(torch.cuda.current_device())
