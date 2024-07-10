@@ -81,12 +81,15 @@ if __name__ == '__main__':
     print(torch.cuda.is_available())
     print(torch.cuda.current_device())
 
+    # 设置参数，原文通过执行batch_tumvi.py文件来设置参数
     parser = argparse.ArgumentParser()
     parser.add_argument("--imagedir", type=str, help="path to image directory")
     parser.add_argument("--imagestamp", type=str, help="")
     parser.add_argument("--imupath", type=str, help="")
-    parser.add_argument("--gtpath", type=str, help="")
-    parser.add_argument("--enable_h5", action="store_true", help="")
+    parser.add_argument("--gtpath", type=str, help="") #参考轨迹（真值）
+
+    #当数据集较大时，可以将数据集存储为h5文件，加快读取速度？
+    parser.add_argument("--enable_h5", action="store_true", help="") #存在的时候就是真
     parser.add_argument("--h5path", type=str, help="")
     parser.add_argument("--resultpath", type=str, default="result.txt", help="")
 
@@ -94,7 +97,7 @@ if __name__ == '__main__':
     parser.add_argument("--t0", default=0, type=int, help="starting frame")
     parser.add_argument("--stride", default=3, type=int, help="frame stride")
 
-    parser.add_argument("--weights", default="droid.pth") #权重自动导入
+    parser.add_argument("--weights", default="droid.pth") #权重自动导入（直接用DROID-SLAM训练好的权重）
     parser.add_argument("--buffer", type=int, default=80)
     parser.add_argument("--image_size", default=[240, 320])
 
@@ -132,7 +135,7 @@ if __name__ == '__main__':
     """ Load reference trajectory (for visualization) """
     all_gt ={}
     try:
-        fp = open(args.gtpath,'rt')
+        fp = open(args.gtpath,'rt') #打开真值轨迹文件
         while True:
             line = fp.readline().strip()
             if line == '':break
