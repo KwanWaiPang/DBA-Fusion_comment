@@ -16,8 +16,8 @@ from scipy.spatial.transform import Rotation
 class DBAFusionFrontend:
     def __init__(self, net, video, args):
         self.video = video
-        self.update_op = net.update
-        self.graph = CovisibleGraph(video, net.update, args=args)
+        self.update_op = net.update #网络更新的操作
+        self.graph = CovisibleGraph(video, net.update, args=args) #创建一个图
 
         # local optimization window
         self.t0 = 0
@@ -151,7 +151,7 @@ class DBAFusionFrontend:
         self.video.state.odo_vel              = self.video.state.odo_vel              [roll:]
 
     def __update(self):
-        """ add edges, perform update """
+        """ add edges（构建因子图的residual）, perform update """
         self.count += 1
         self.t1 += 1
 
@@ -853,10 +853,10 @@ class DBAFusionFrontend:
     def __call__(self):
         """ main update """
 
-        # do initialization
+        # do initialization（先进行初始化，执行视觉与惯性的对齐）
         if not self.is_initialized and self.video.counter.value == self.warmup:
             self.__initialize()
-        # do update
+        # do update（更新图）
         elif self.is_initialized and self.t1 < self.video.counter.value:
             self.__update()
 

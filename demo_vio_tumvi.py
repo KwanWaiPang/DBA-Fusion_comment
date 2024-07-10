@@ -142,50 +142,60 @@ if __name__ == '__main__':
             if line[0] == '#' : continue
             line = re.sub('\s\s+',' ',line)
             elem = line.split(',')
-            sod = float(elem[0])/1e9
+            sod = float(elem[0])/1e9 #时间戳
             if sod not in all_gt.keys():
                 all_gt[sod] ={}
+            # 先获取四元数，然后把四元数转换为旋转矩阵
             R = quaternion.as_rotation_matrix(quaternion.from_float_array([float(elem[4]),\
                                                                            float(elem[5]),\
                                                                            float(elem[6]),\
                                                                            float(elem[7])]))
             TTT = np.eye(4,4)
             TTT[0:3,0:3] = R
+            # 第四列的前3行，分别是x,y,z
             TTT[0:3,3] = np.array([ float(elem[1]), float(elem[2]), float(elem[3])])
             all_gt[sod]['T'] = TTT
-        all_gt_keys =sorted(all_gt.keys())
+        all_gt_keys =sorted(all_gt.keys())#按时间戳排序
         fp.close()
     except:
         pass
 
     """ Load IMU data """
     all_imu = np.loadtxt(args.imupath,delimiter=',')
-    all_imu[:,0] /= 1e9
-    all_imu[:,1:4] *= 180/math.pi
-    
+    all_imu[:,0] /= 1e9 #时间戳，转换为秒
+    all_imu[:,1:4] *= 180/math.pi #角速度，转换为度
+    # 线加速度不变
+    #     
     tstamps = []
 
     """ Load images """
-    clahe = cv2.createCLAHE(2.0,tileGridSize=(8, 8))
+    clahe = cv2.createCLAHE(2.0,tileGridSize=(8, 8)) #直方图均衡化
     for (t, image, intrinsics) in tqdm(image_stream(args.imagedir, args.imagestamp, args.enable_h5,\
                                                      args.h5path, args.calib, args.stride)):
+        # 对图像进行直方图均衡化
         mm = clahe.apply(image[0][0].numpy())
-        image[0] = torch.tensor(mm[None].repeat(3,0))
+        # mm[None]：假设 mm 是一个 2D 张量，形状为 (H, W)，那么 mm[None] 的形状将变为 (1, H, W)
+        image[0] = torch.tensor(mm[None].repeat(3,0))#.repeat(3,0)， 将形状从 (1, H, W) 变为 (3, H, W)，
         if args.show_plot:
-            show_image(image[0])
+            show_image(image[0]) #将图像通过cv2.imshow显示出来
         if dbaf is None:
             args.image_size = [image.shape[2], image.shape[3]]
+            # 根据参数初始化DBAFusion类
             dbaf = DBAFusion(args)
+            # 设置IMU数据
             dbaf.frontend.all_imu = all_imu
             dbaf.frontend.all_gnss = []
             dbaf.frontend.all_odo = []
+            # 设置图像时间戳
             dbaf.frontend.all_stamp  = np.loadtxt(args.imagestamp,str,delimiter=',')
             dbaf.frontend.all_stamp = dbaf.frontend.all_stamp[:,0].astype(np.float64)[None].transpose(1,0)/1e9
             if len(all_gt) > 0:
+                # 设置真值数据
                 dbaf.frontend.all_gt = all_gt
+                # 将all_gt排序后的
                 dbaf.frontend.all_gt_keys = all_gt_keys
             
-            # IMU-Camera Extrinsics
+            # IMU-Camera Extrinsics（设置IMU与camera的外参）
             dbaf.video.Ti1c = np.array(
                     [-0.9995250378696743, 0.029615343885863205, -0.008522328211654736, 0.04727988224914392,
                       0.0075019185074052044, -0.03439736061393144, -0.9993800792498829, -0.047443232143367084,
@@ -194,13 +204,14 @@ if __name__ == '__main__':
             dbaf.video.Ti1c = np.linalg.inv(dbaf.video.Ti1c)
             dbaf.video.Tbc = gtsam.Pose3(dbaf.video.Ti1c)
             
-            # IMU parameters
+            # IMU parameters（IMU一些参数的设置）
             dbaf.video.state.set_imu_params((np.array([ 0.0003924 * 25,0.000205689024915 * 25, 0.004905 * 10, 0.000001454441043 * 5000])*1.0).tolist())
             dbaf.video.init_pose_sigma = np.array([0.1, 0.1, 0.0001, 0.0001,0.0001,0.0001])
             dbaf.video.init_bias_sigma = np.array([1.0,1.0,1.0, 1.0,1.0,1.0])
             dbaf.frontend.translation_threshold = args.translation_threshold
             dbaf.frontend.graph.mask_threshold  = args.mask_threshold
 
+        # 进行tracking
         dbaf.track(t, image, intrinsics=intrinsics)
 
     if args.save_pkl:

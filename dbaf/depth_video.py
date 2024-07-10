@@ -46,7 +46,7 @@ class DepthVideo:
         self.ht = ht = image_size[0]
         self.wd = wd = image_size[1]
 
-        ### state attributes ###
+        ### state attributes，状态向量 ###
         self.tstamp = torch.zeros(buffer, device="cuda", dtype=torch.float64).share_memory_()
         self.images = torch.zeros(buffer, 3, ht, wd, device="cuda", dtype=torch.uint8)
         self.dirty = torch.zeros(buffer, device="cuda", dtype=torch.bool).share_memory_()

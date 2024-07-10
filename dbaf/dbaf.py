@@ -13,19 +13,21 @@ import geom.projective_ops as pops
 import droid_backends
 import pickle
 
+# 处理的整个类
 class DBAFusion:
     def __init__(self, args):
         super(DBAFusion, self).__init__()
-        self.load_weights(args.weights) # load DroidNet weights
+        self.load_weights(args.weights) # （导入网络的权重，并初始化DroidNet）load DroidNet weights
         self.args = args
 
-        # store images, depth, poses, intrinsics (shared between processes)
+        # （看似用于存放所有的数据的）store images, depth, poses, intrinsics (shared between processes)
+        # args.stereo设置为false的，args.upsample也是false。其余的就是图像的尺寸，缓冲区大小，是否保存pkl文件
         self.video = DepthVideo(args.image_size, args.buffer, save_pkl = args.save_pkl, stereo=args.stereo, upsample=args.upsample)
 
         # filter incoming frames so that there is enough motion
         self.filterx = MotionFilter(self.net, self.video, thresh=args.filter_thresh)
 
-        # frontend process
+        # frontend process（至今local BA）
         self.frontend = DBAFusionFrontend(self.net, self.video, self.args)
 
         self.pklpath = args.pklpath
@@ -35,6 +37,7 @@ class DBAFusion:
         """ load trained model weights """
 
         print(weights)
+        # 导入权重前先初始化了Droid-SLAM的网络
         self.net = DroidNet()
         state_dict = OrderedDict([
             (k.replace("module.", ""), v) for (k, v) in torch.load(weights).items()])
@@ -48,14 +51,14 @@ class DBAFusion:
         self.net.to("cuda:0").eval()
 
     def track(self, tstamp, image, depth=None, intrinsics=None):
-        """ main thread - update map """
+        """ main thread - update map （进行tracking） """
 
-        with torch.no_grad():
-            # check there is enough motion
+        with torch.no_grad():# 不进行梯度计算
+            # check there is enough motion（同时做了深度特征的提取，获得的self.video算是打包好的数据）
             self.filterx.track(tstamp, image, depth, intrinsics)
 
             # local bundle adjustment
-            self.frontend()
+            self.frontend()#应该是调用__call__函数
 
     def terminate(self, stream=None):
         """ terminate the visualization process, return poses [t, q] """

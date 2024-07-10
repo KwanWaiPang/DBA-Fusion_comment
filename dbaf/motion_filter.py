@@ -17,7 +17,7 @@ class MotionFilter:
         # split net modules
         self.cnet = net.cnet
         self.fnet = net.fnet
-        self.update = net.update
+        self.update = net.update #调用网络的update函数
 
         self.video = video
         self.thresh = thresh
@@ -56,20 +56,22 @@ class MotionFilter:
     def track(self, tstamp, image, depth=None, intrinsics=None):
         """ main update operation - run on every frame in video """
 
+        # 单位矩阵 pose
         Id = lietorch.SE3.Identity(1,).data.squeeze()
+        # 图像的高和宽
         ht = image.shape[-2] // 8
         wd = image.shape[-1] // 8
 
-        # normalize images
+        # normalize images（将图像进行归一化）
         inputs = image[None, :, [2,1,0]].to(self.device) / 255.0
         inputs = inputs.sub_(self.MEAN).div_(self.STDV)
 
         # extract features
-        gmap = self.__feature_encoder(inputs) #当前帧的特征, fnet
+        gmap = self.__feature_encoder(inputs) #提取当前帧的特征, fnet
 
         ### always add first frame to the depth video ###
         if self.video.counter.value == 0:
-            net, inp = self.__context_encoder(inputs[:,[0]])
+            net, inp = self.__context_encoder(inputs[:,[0]]) #提取对应的context features
             self.net, self.inp, self.fmap = net, inp, gmap # [1,128,H//8,W//8], [1,128,H//8,W//8], [1,128,H//8,W//8]
             self.video.append(tstamp, image[0], Id, 1.0, depth, intrinsics / 8.0, gmap, net[0,0], inp[0,0])
 
@@ -84,10 +86,11 @@ class MotionFilter:
             _, delta, weight = self.update(self.net[None], self.inp[None], corr)
 
             # check motion magnitue / add new frame to video
-            if delta.norm(dim=-1).mean().item() > self.thresh:
+            if delta.norm(dim=-1).mean().item() > self.thresh:#如果运动的幅度大于阈值
                 self.count = 0
                 net, inp = self.__context_encoder(inputs[:,[0]]) 
                 self.net, self.inp, self.fmap = net, inp, gmap 
+                # 打包数据，时间错，图像，内参，特征，context features，input features
                 self.video.append(tstamp, image[0], None, None, depth, intrinsics / 8.0, gmap, net[0], inp[0])
             else:
                 self.count += 1
