@@ -9,9 +9,9 @@
 
 [comment]: <> (  <h2 align="center">PAPER</h2>)
   <h3 align="center">
-  <a href="https://arxiv.org/pdf/2403.13714">Paper</a> 
-  | <a href="https://github.com/GREAT-WHU/DBA-Fusion">Original Github Page</a>
-  | <a href="https://kwanwaipang.github.io/File/Blogs/Poster/Learning_based_VO.html">Survey for Learning-based VO</a>
+  <a href="https://arxiv.org/pdf/2403.13714" target="_blank">Paper</a> 
+  | <a href="https://github.com/GREAT-WHU/DBA-Fusion" target="_blank">Original Github Page</a>
+  | <a href="https://kwanwaipang.github.io/File/Blogs/Poster/Learning_based_VO.html" target="_blank">Survey for Learning-based VO</a>
   </h3>
   <div align="center"></div>
 
@@ -84,7 +84,7 @@ python batch_tumvi_outdoors6.py
 <img alt="" src="./assets/微信截图_20240710150644.png" width='90%' />
 </div>
 * demo 视频见link<sup>
-[1]()
+[1](https://www.bilibili.com/video/BV1mS411c7tb/?vd_source=a88e426798937812a8ffc1a9be5a3cb7)
 </sup>.
 
 * evaluation: (注意，需要到代码中修改--ref_file的地址)
