@@ -51,7 +51,8 @@ def str2array(ss):
 
 
 # f = open(r'./results/outdoors6.pkl','rb')
-f = open(r'./results/corridor1.pkl','rb')
+# f = open(r'./results/corridor1.pkl','rb')
+f = open(r'./results/outdoors6.pkl','rb')
 dump_data= pickle.load(f)
 print(dump_data.keys())
 
@@ -72,6 +73,7 @@ def key_action_callback(vis, action, mods):
 vis.register_key_action_callback(32, key_action_callback)  # space
 
 for ix in sorted(dump_data['points'].keys()):
+    # 有index范围
     if ix < 520 : continue
     if ix > 920 : continue
 

@@ -69,28 +69,40 @@ tar -xvf dataset-corridor1_512_16.tar
 python dataset/tumvi_to_hdf5.py --imagedir=${DATASET_DIR}/dataset-${SEQ}_512_16/mav0/cam0/data --imagestamp=${DATASET_DIR}/dataset-${SEQ}_512_16/mav0/cam0/data.csv --h5path=${SEQ}.h5 --calib=calib/tumvi.txt --stride 4
 
 python dataset/tumvi_to_hdf5.py --imagedir=dataset/dataset-corridor1_512_16/mav0/cam0/data --imagestamp=dataset/dataset-corridor1_512_16/mav0/cam0/data.csv --h5path=dataset/dataset-corridor1_512_16/dataset-corridor1_512_16.h5 --calib=calib/tumvi.txt --stride 4
+
+python dataset/tumvi_to_hdf5.py --imagedir=dataset/dataset-outdoors6_512_16/mav0/cam0/data --imagestamp=dataset/dataset-outdoors6_512_16/mav0/cam0/data.csv --h5path=dataset/dataset-outdoors6_512_16.h5 --calib=calib/tumvi.txt --stride 4
 ~~~
 * 在batch_tumvi.py文件中修改数据的路径，若是采用h5文件则需要添加对应的 "--enable_h5" and "--h5_path" (注意此处带有可视化，在服务器上运行应该采用MobaXterm)
 ~~~
 cd DBA-Fusion/
 conda activate dbaf
 python batch_tumvi.py  # This would trigger demo_vio_tumvi.py automatically.
+
+python batch_tumvi_outdoors6.py 
 ~~~
+<div align=center>
+<img alt="" src="./assets/微信截图_20240710150644.png" width='90%' />
+</div>
 * demo 视频见link<sup>
-[1](),
-[2]()
+[1]()
 </sup>.
 
 * evaluation: (注意，需要到代码中修改--ref_file的地址)
 ~~~
 python evaluation_scripts/evaluate_tumvi.py --seq corridor1
+
+python evaluation_scripts/evaluate_tumvi.py --seq outdoors6
 ~~~
 
 <div align=center>
 <img alt="" src="./assets/微信截图_20240710124351.png" width='90%' />
 </div>
 
-* 3D 可视化（注意修改 .pkl 文件的路径，它包含了all keyframe poses and point clouds.
+<div align=center>
+<img alt="" src="./assets/微信截图_20240710151319.png" width='90%' />
+</div>
+
+* 3D 可视化（注意修改代码中的 .pkl 文件的路径，它包含了all keyframe poses and point clouds.
 ）
 ~~~
 python visualization/check_reconstruction_tumvi.py
@@ -103,10 +115,13 @@ python visualization/check_reconstruction_tumvi_animation.py
 ~~~
 cd /usr/lib/
 sudo mkdir dri
-
+# 上面两步是创建文件夹并且进入到对应的文件夹中，然后再软连接一下
 ln -s /lib/x86_64-linux-gnu/dri/swrast_dri.so swrast_dri.so
 ~~~
 * 若再报错```libGL error: MESA-LOADER: failed to open swrast: /home/gwp/miniconda3/envs/dbaf/bin/../lib/libstdc++.so.6: version `GLIBCXX_3.4.30' not found (required by /lib/x86_64-linux-gnu/libLLVM-15.so.1) (search paths /usr/lib/x86_64-linux-gnu/dri:\$${ORIGIN}/dri:/usr/lib/dri, suffix _dri)```
 ~~~
  conda install -c conda-forge gcc
 ~~~
+* demo 视频见link<sup>
+[1]()
+</sup>.
