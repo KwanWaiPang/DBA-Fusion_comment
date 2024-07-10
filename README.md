@@ -49,3 +49,64 @@ python setup.py install
 ~~~
 
 # 代码测试
+* 下载预训练好的模型（demo_vio_tumvi.py文件中的参数--weights带有默认值）
+~~~
+<!-- pip install gdown -->
+
+https://drive.google.com/file/d/1PpqVt1H4maBa_GbPJp4NwxRsd9jk-elh/view
+~~~
+* TUM-VI数据集 [网页](https://cvg.cit.tum.de/data/datasets/visual-inertial-dataset); [下载链接](https://cdn2.vision.in.tum.de/tumvi/exported/euroc/512_16/)
+~~~
+cd dataset
+wget https://cdn2.vision.in.tum.de/tumvi/exported/euroc/512_16/dataset-corridor1_512_16.tar
+wget https://cdn2.vision.in.tum.de/tumvi/exported/euroc/512_16/dataset-outdoors6_512_16.tar
+
+<!-- 解压 -->
+tar -xvf dataset-corridor1_512_16.tar
+~~~
+* 为了加速处理，将文件转换位h5文件
+~~~
+python dataset/tumvi_to_hdf5.py --imagedir=${DATASET_DIR}/dataset-${SEQ}_512_16/mav0/cam0/data --imagestamp=${DATASET_DIR}/dataset-${SEQ}_512_16/mav0/cam0/data.csv --h5path=${SEQ}.h5 --calib=calib/tumvi.txt --stride 4
+
+python dataset/tumvi_to_hdf5.py --imagedir=dataset/dataset-corridor1_512_16/mav0/cam0/data --imagestamp=dataset/dataset-corridor1_512_16/mav0/cam0/data.csv --h5path=dataset/dataset-corridor1_512_16/dataset-corridor1_512_16.h5 --calib=calib/tumvi.txt --stride 4
+~~~
+* 在batch_tumvi.py文件中修改数据的路径，若是采用h5文件则需要添加对应的 "--enable_h5" and "--h5_path" (注意此处带有可视化，在服务器上运行应该采用MobaXterm)
+~~~
+cd DBA-Fusion/
+conda activate dbaf
+python batch_tumvi.py  # This would trigger demo_vio_tumvi.py automatically.
+~~~
+* demo 视频见link<sup>
+[1](),
+[2]()
+</sup>.
+
+* evaluation: (注意，需要到代码中修改--ref_file的地址)
+~~~
+python evaluation_scripts/evaluate_tumvi.py --seq corridor1
+~~~
+
+<div align=center>
+<img alt="" src="./assets/微信截图_20240710124351.png" width='90%' />
+</div>
+
+* 3D 可视化（注意修改 .pkl 文件的路径，它包含了all keyframe poses and point clouds.
+）
+~~~
+python visualization/check_reconstruction_tumvi.py
+
+# or 
+
+python visualization/check_reconstruction_tumvi_animation.py
+~~~
+* 可视化的时候遇到报错```libGL error: MESA-LOADER: failed to open swrast:```这应该是需要建立软链接
+~~~
+cd /usr/lib/
+sudo mkdir dri
+
+ln -s /lib/x86_64-linux-gnu/dri/swrast_dri.so swrast_dri.so
+~~~
+* 若再报错```libGL error: MESA-LOADER: failed to open swrast: /home/gwp/miniconda3/envs/dbaf/bin/../lib/libstdc++.so.6: version `GLIBCXX_3.4.30' not found (required by /lib/x86_64-linux-gnu/libLLVM-15.so.1) (search paths /usr/lib/x86_64-linux-gnu/dri:\$${ORIGIN}/dri:/usr/lib/dri, suffix _dri)```
+~~~
+ conda install -c conda-forge gcc
+~~~

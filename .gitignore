@@ -155,4 +155,7 @@ cache
 data
 figures/*.pdf
 
+# dataset/*.tar
+dataset/dataset-*
+
 

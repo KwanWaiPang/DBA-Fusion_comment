@@ -92,7 +92,7 @@ if __name__ == '__main__':
     parser.add_argument("--t0", default=0, type=int, help="starting frame")
     parser.add_argument("--stride", default=3, type=int, help="frame stride")
 
-    parser.add_argument("--weights", default="droid.pth")
+    parser.add_argument("--weights", default="droid.pth") #权重自动导入
     parser.add_argument("--buffer", type=int, default=80)
     parser.add_argument("--image_size", default=[240, 320])
 

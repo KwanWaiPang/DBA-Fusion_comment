@@ -117,7 +117,7 @@ if __name__ == '__main__':
     args.subcommand = 'tum'
     seq = args.seq
 
-    args.ref_file = '/mnt/z/tum-vi/dataset-%s_512_16/dso/gt_imu.csv' % seq
+    args.ref_file = '/home/gwp/DBA-Fusion/dataset/dataset-%s_512_16/dso/gt_imu.csv' % seq
     # Convert GT format
     dd = np.loadtxt(args.ref_file,delimiter=',',comments='#')
     dd_new = np.copy(dd)

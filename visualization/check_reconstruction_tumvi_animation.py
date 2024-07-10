@@ -50,7 +50,8 @@ def str2array(ss):
     return np.array(num)
 
 
-f = open(r'./results/outdoors6.pkl','rb')
+# f = open(r'./results/outdoors6.pkl','rb')
+f = open(r'./results/corridor1.pkl','rb')
 dump_data= pickle.load(f)
 print(dump_data.keys())
 
