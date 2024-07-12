@@ -21,6 +21,7 @@ def show_image(image):
     cv2.imshow('image', image / 255.0)
     cv2.waitKey(1)
 
+# 打包图像数据：时间戳、图像、内参
 def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
     """ image generator """
 
@@ -170,6 +171,7 @@ if __name__ == '__main__':
 
     """ Load images """
     clahe = cv2.createCLAHE(2.0,tileGridSize=(8, 8)) #直方图均衡化
+    # 通过image_stream函数获取数据
     for (t, image, intrinsics) in tqdm(image_stream(args.imagedir, args.imagestamp, args.enable_h5,\
                                                      args.h5path, args.calib, args.stride)):
         # 对图像进行直方图均衡化
