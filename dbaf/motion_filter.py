@@ -73,9 +73,10 @@ class MotionFilter:
         gmap = self.__feature_encoder(inputs) #提取matching feature, fnet(获取feature matching，另外一个为context network)
 
         ### always add first frame to the depth video ###
-        if self.video.counter.value == 0:
+        if self.video.counter.value == 0:#如果是第一帧，什么都没有
             # 返回的context features分为两部分，一部分为tanh激活（net）和另外一部分为relu激活（inp）
             net, inp = self.__context_encoder(inputs[:,[0]]) 
+            # context features一部分为tanh激活（net）和另外一部分为relu激活（inp），gmap为matching feature
             self.net, self.inp, self.fmap = net, inp, gmap # [1,128,H//8,W//8], [1,128,H//8,W//8], [1,128,H//8,W//8]
             self.video.append(tstamp, image[0], Id, 1.0, depth, intrinsics / 8.0, gmap, net[0,0], inp[0,0])
 
@@ -87,6 +88,8 @@ class MotionFilter:
             corr = CorrBlock(self.fmap[None,[0]], gmap[None,[0]])(coords0) #关键帧和当前帧之间的相关运算 [None,[0]]即保留第一行之后进行unsqueeze(0)，
 
             # approximate flow magnitude using 1 update iteration
+            # context features分为两部分，一部分为tanh激活（net）和另外一部分为relu激活（inp）
+            # 通过更新以及相关运算获取delta
             _, delta, weight = self.update(self.net[None], self.inp[None], corr)
 
             # check motion magnitue / add new frame to video

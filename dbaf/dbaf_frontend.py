@@ -24,10 +24,10 @@ class DBAFusionFrontend:
         self.t1 = 0
 
         # frontend variables
-        self.is_initialized = False
+        self.is_initialized = False #是否初始化
         self.count = 0
 
-        self.warmup = args.warmup
+        self.warmup = args.warmup #传入的参数，要等待多少帧才开始优化
         self.vi_warmup = 12
         if 'vi_warmup' in args: self.vi_warmup = args.vi_warmup
         self.beta = args.beta
@@ -842,7 +842,7 @@ class DBAFusionFrontend:
         self.video.disps[self.t1] = self.video.disps[self.t1-4:self.t1].mean()
         
         # initialization complete
-        self.is_initialized = True
+        self.is_initialized = True # 初始化完成
 
         with self.video.get_lock():
             self.video.ready.value = 1
@@ -854,9 +854,9 @@ class DBAFusionFrontend:
         """ main update """
 
         # do initialization（先进行初始化，执行视觉与惯性的对齐）
-        if not self.is_initialized and self.video.counter.value == self.warmup:
+        if not self.is_initialized and self.video.counter.value == self.warmup:#若未初始化，且视频计数器的值等于warmup，理解就是等待了多少帧之后才开始初始化
             self.__initialize()
-        # do update（更新图）
+        # 如果已经初始化了，do update（更新图）
         elif self.is_initialized and self.t1 < self.video.counter.value:
             self.__update()
 

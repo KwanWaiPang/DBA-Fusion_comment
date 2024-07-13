@@ -41,7 +41,7 @@ class DepthVideo:
     def __init__(self, image_size=[480, 640], buffer=1024, save_pkl = False, stereo=False, upsample = False, device="cuda:0"):
                 
         # current keyframe count
-        self.counter = Value('i', 0)
+        self.counter = Value('i', 0) #计数器，用于计数当前的帧数
         self.ready = Value('i', 0)
         self.ht = ht = image_size[0] #图像的长宽
         self.wd = wd = image_size[1] #图像的长宽
@@ -61,8 +61,11 @@ class DepthVideo:
         c = 1 if not self.stereo else 2
 
         ### feature attributes ###
+        # 传入的为gmap为matching feature
         self.fmaps = torch.zeros(buffer, c, 128, ht//8, wd//8, dtype=torch.half, device="cuda").share_memory_()
+        #传入的为context features的一部分为tanh激活（net）
         self.nets = torch.zeros(buffer, 128, ht//8, wd//8, dtype=torch.half, device="cuda").share_memory_()
+        #传入的为context features的另一部分为relu激活（inp）
         self.inps = torch.zeros(buffer, 128, ht//8, wd//8, dtype=torch.half, device="cuda").share_memory_()
 
         # initialize poses to identity transformation
@@ -129,35 +132,35 @@ class DepthVideo:
 
     def __item_setter(self, index, item):
         if isinstance(index, int) and index >= self.counter.value:
-            self.counter.value = index + 1
+            self.counter.value = index + 1 #更新counter的值，计数加1
         
         elif isinstance(index, torch.Tensor) and index.max().item() > self.counter.value:
             self.counter.value = index.max().item() + 1
 
-        self.tstamp[index] = item[0]
-        self.images[index] = item[1]
+        self.tstamp[index] = item[0] #时间戳
+        self.images[index] = item[1] #图像数据
 
         if item[2] is not None:
-            self.poses[index] = item[2]
+            self.poses[index] = item[2] #位姿（motion filter中传入为单位阵）
 
         if item[3] is not None:
             self.disps[index] = item[3]
 
         if item[4] is not None:
-            depth = item[4][3::8,3::8]
+            depth = item[4][3::8,3::8] #传入深度
             self.disps_sens[index] = torch.where(depth>0, 1.0/depth, depth)
 
         if item[5] is not None:
-            self.intrinsics[index] = item[5]
+            self.intrinsics[index] = item[5] #内参
 
         if len(item) > 6:
-            self.fmaps[index] = item[6]
+            self.fmaps[index] = item[6] # 传入的为gmap为matching feature
 
         if len(item) > 7:
-            self.nets[index] = item[7]
+            self.nets[index] = item[7] #传入的为context features的一部分为tanh激活（net）
 
         if len(item) > 8:
-            self.inps[index] = item[8]
+            self.inps[index] = item[8] #传入的为context features的另一部分为relu激活（inp）
 
     def __setitem__(self, index, item):
         with self.get_lock():

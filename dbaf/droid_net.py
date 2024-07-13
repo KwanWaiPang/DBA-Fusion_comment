@@ -161,7 +161,8 @@ class DroidNet(nn.Module):
 
         fmaps = self.fnet(images)#获取feature matching
         net = self.cnet(images)#获取context features
-            
+
+        #  将 net 张量沿着第2维度（通常是通道维度）拆分成两个张量。假设 net 的形状为 (batch_size, H, W, 256)，那么拆分后的两个张量的形状分别为 (batch_size, H, W, 128) 和 (batch_size, H, W, 128)。 
         net, inp = net.split([128,128], dim=2)#将context features分为两部分
         net = torch.tanh(net)#tanh激活函数
         inp = torch.relu(inp)#relu激活函数
@@ -177,7 +178,7 @@ class DroidNet(nn.Module):
         ii = ii.to(device=images.device, dtype=torch.long)
         jj = jj.to(device=images.device, dtype=torch.long)
 
-        fmaps, net, inp = self.extract_features(images)
+        fmaps, net, inp = self.extract_features(images)#提取特征，获取feature matching和context features
         net, inp = net[:,ii], inp[:,ii]
         corr_fn = CorrBlock(fmaps[:,ii], fmaps[:,jj], num_levels=4, radius=3)
 

@@ -55,11 +55,11 @@ class DBAFusion:
         """ main thread - update map （进行tracking） """
 
         with torch.no_grad():# 不进行梯度计算
-            # check there is enough motion（传入的为图片、时间和内参，计算是否有足够的motion，同时做了特征的提取并更新self.video中数据）
+            # check there is enough motion（传入的为图片、时间和内参，计算是否有足够的motion，同时做了特征的提取并将数据更新到self.video中）
             self.filterx.track(tstamp, image, depth, intrinsics)
 
             # local bundle adjustment
-            self.frontend()#应该是调用__call__函数
+            self.frontend()#应该是调用__call__函数，进行BA优化
 
     def terminate(self, stream=None):
         """ terminate the visualization process, return poses [t, q] """

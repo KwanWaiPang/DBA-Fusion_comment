@@ -110,6 +110,7 @@ if __name__ == '__main__':
     # 在MotionFilter会用到这个参数，用于判断是否添加关键帧（检查运动是否大于阈值）
     parser.add_argument("--filter_thresh", type=float, default=2.4, help="how much motion before considering new keyframe")
 
+    # 在DBAFusionFrontend会用到这个参数，要等待多少帧才开始优化
     parser.add_argument("--warmup", type=int, default=8, help="number of warmup frames")
     parser.add_argument("--keyframe_thresh", type=float, default=3.0, help="threshold to create a new keyframe")
     parser.add_argument("--frontend_thresh", type=float, default=16.0, help="add edges between frames whithin this distance")
