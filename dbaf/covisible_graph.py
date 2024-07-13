@@ -113,35 +113,40 @@ class CovisibleGraph:
         # remove duplicate edges(将重复的部分去掉)
         ii, jj = self.__filter_repeated_edges(ii, jj)
 
-        if ii.shape[0] == 0:
+        if ii.shape[0] == 0: #如果经过去重后的 ii 的长度为 0，直接返回，不做任何操作。
             return
 
         # place limit on number of factors
+        # 如果 self.max_factors 大于 0，并且当前已有的因子数量加上要添加的新因子数量超过了 self.max_factors，
+        # 并且存在 self.corr，并且 remove 为真
         if self.max_factors > 0 and self.ii.shape[0] + ii.shape[0] > self.max_factors \
                 and self.corr is not None and remove:
             
-            ix = torch.arange(len(self.age))[torch.argsort(self.age).cpu()]
+            ix = torch.arange(len(self.age))[torch.argsort(self.age).cpu()]#对age进行排序，返回的是排序后的索引
+            # 则调用 self.rm_factors 方法，移除超出限制的因子（根据时长来去除）
             self.rm_factors(ix >= self.max_factors - ii.shape[0], store=True)
 
-        net = self.video.nets[ii].to(self.device).unsqueeze(0)
+        #nets传入的为context features的一部分为tanh激活（net）
+        net = self.video.nets[ii].to(self.device).unsqueeze(0)#根据索引 ii 获取对应的数据，放到gpu上，并在第 0 维度上增加一个维度。
 
         # correlation volume for new edges
         if self.corr_impl == "volume":
-            c = (ii == jj).long()
+            c = (ii == jj).long() #如果 ii 和 jj 相等，则 c 为 1，否则为 0
             fmap1 = self.video.fmaps[ii,0].to(self.device).unsqueeze(0)
-            fmap2 = self.video.fmaps[jj,c].to(self.device).unsqueeze(0)
-            corr = CorrBlock(fmap1, fmap2)
+            fmap2 = self.video.fmaps[jj,c].to(self.device).unsqueeze(0) #获取ii与jj对应的特征图（传入的为matching feature）
+            corr = CorrBlock(fmap1, fmap2) #调用 CorrBlock 类，传入两个特征图，返回一个相关性体，gwp_TODO：corrBlock的操作是否一致？
             self.corr = corr if self.corr is None else self.corr.cat(corr)
-
+            
+            # inp传入的为context features的另一部分为relu激活（inp）
             inp = self.video.inps[ii].to(self.device).unsqueeze(0)
             self.inp = inp if self.inp is None else torch.cat([self.inp, inp], 1)
 
-        with torch.cuda.amp.autocast(enabled=False):
-            target, _ = self.video.reproject(ii, jj)
-            weight = torch.zeros_like(target)
+        with torch.cuda.amp.autocast(enabled=False):#关闭自动混合精度
+            target, _ = self.video.reproject(ii, jj) #根据 ii 和 jj 重投影，返回投影后的坐标和掩码
+            weight = torch.zeros_like(target) #根据 target 的形状创建一个全零的张量
 
-        self.ii = torch.cat([self.ii, ii], 0)
-        self.jj = torch.cat([self.jj, jj], 0)
+        self.ii = torch.cat([self.ii, ii], 0) #将 ii 添加到 self.ii 中
+        self.jj = torch.cat([self.jj, jj], 0) #将 jj 添加到 self.jj 中
         self.age = torch.cat([self.age, torch.zeros_like(ii)], 0)
 
         # reprojection factors
