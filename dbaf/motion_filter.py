@@ -15,8 +15,8 @@ class MotionFilter:
     def __init__(self, net, video, thresh=2.5, device="cuda:0"):
         
         # split net modules
-        self.cnet = net.cnet
-        self.fnet = net.fnet
+        self.cnet = net.cnet #调用context network
+        self.fnet = net.fnet #调用feature network
         self.update = net.update #调用网络的update函数
 
         self.video = video
@@ -67,7 +67,7 @@ class MotionFilter:
         inputs = inputs.sub_(self.MEAN).div_(self.STDV)
 
         # extract features
-        gmap = self.__feature_encoder(inputs) #提取当前帧的特征, fnet
+        gmap = self.__feature_encoder(inputs) #提取matching feature, fnet(获取feature matching，另外一个为context network)
 
         ### always add first frame to the depth video ###
         if self.video.counter.value == 0:

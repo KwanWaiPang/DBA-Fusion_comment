@@ -145,8 +145,8 @@ class UpdateModule(nn.Module):
 class DroidNet(nn.Module):
     def __init__(self):
         super(DroidNet, self).__init__()
-        self.fnet = BasicEncoder(output_dim=128, norm_fn='instance')
-        self.cnet = BasicEncoder(output_dim=256, norm_fn='none')
+        self.fnet = BasicEncoder(output_dim=128, norm_fn='instance')# feature matching network
+        self.cnet = BasicEncoder(output_dim=256, norm_fn='none')# context network
         self.update = UpdateModule()
 
 
