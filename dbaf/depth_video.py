@@ -76,7 +76,7 @@ class DepthVideo:
         self.images_save = torch.zeros(5000, ht//8, wd//8, 3, device="cuda", dtype=torch.float)
         if upsample:
             self.disps_up_save = torch.zeros(5000, ht, wd, device="cuda", dtype=torch.float).share_memory_()
-        self.count_save = 0
+        self.count_save = 0 #保存的帧数
         self.save_pkl = save_pkl
         self.upsample_flag = upsample
 

@@ -20,15 +20,15 @@ class DBAFusion:
         self.load_weights(args.weights) # （导入网络的权重，并初始化DroidNet）load DroidNet weights
         self.args = args
 
-        # （看似用于存放所有的数据的）store images, depth, poses, intrinsics (shared between processes)
+        # （此类应该是用于存放所有的数据的）store images, depth, poses, intrinsics (shared between processes)
         # args.stereo设置为false的，args.upsample也是false。其余的就是图像的尺寸，缓冲区大小，是否保存pkl文件
         self.video = DepthVideo(args.image_size, args.buffer, save_pkl = args.save_pkl, stereo=args.stereo, upsample=args.upsample)
 
         # filter incoming frames so that there is enough motion
-        self.filterx = MotionFilter(self.net, self.video, thresh=args.filter_thresh)
+        self.filterx = MotionFilter(self.net, self.video, thresh=args.filter_thresh)#传入的参数为网络、数据、添加关键帧的阈值
 
-        # frontend process（至今local BA）
-        self.frontend = DBAFusionFrontend(self.net, self.video, self.args)
+        # frontend process（视觉的local BA，应该可以理解为用网络构建残差约束）
+        self.frontend = DBAFusionFrontend(self.net, self.video, self.args)#传入的参数为网络、数据、args（参数）
 
         self.pklpath = args.pklpath
         self.upsample = args.upsample
@@ -64,11 +64,12 @@ class DBAFusion:
         """ terminate the visualization process, return poses [t, q] """
         del self.frontend
 
+    # 保存结果
     def save_vis_easy(self):
-        mcameras = {}
-        mpoints = {}
-        mstamps = {}
-        with torch.no_grad():
+        mcameras = {} # 保存的相机位姿
+        mpoints = {} # 保存的点云
+        mstamps = {} # 保存的时间戳
+        with torch.no_grad(): # 不进行梯度计算
             dirty_index = torch.arange(0,self.video.count_save,device='cuda')
 
             stamps= torch.index_select(self.video.tstamp_save, 0 ,dirty_index)

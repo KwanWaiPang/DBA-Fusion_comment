@@ -17,15 +17,16 @@ class MotionFilter:
         # split net modules
         self.cnet = net.cnet #调用context network
         self.fnet = net.fnet #调用feature network
-        self.update = net.update #调用网络的update函数
+        self.update = net.update #调用update network
 
-        self.video = video
-        self.thresh = thresh
-        self.device = device
+        self.video = video #所有的数据都存放在video中
+        self.thresh = thresh #阈值，超过这个阈值就会添加关键帧
+        self.device = device #默认为cuda:0
 
-        self.count = 0
+        self.count = 0 #计数器，应该是用于统计运动幅度小于阈值的帧的数目，目前好像没有用到
 
-        # mean, std for image normalization
+        # mean, std for image normalization（定义两个张量，分别表示均值和标准差）
+        # 而[:, None, None]就是将其扩展到三维。: 表示保持原有的第一个维度不变（即保留所有元素）。None 是新添加的两个维度。这相当于对原始张量进行升维操作。也就是每个通道的均值和标准差
         self.MEAN = torch.as_tensor([0.485, 0.456, 0.406], device=self.device)[:, None, None]
         self.STDV = torch.as_tensor([0.229, 0.224, 0.225], device=self.device)[:, None, None]
         
@@ -87,10 +88,10 @@ class MotionFilter:
 
             # check motion magnitue / add new frame to video
             if delta.norm(dim=-1).mean().item() > self.thresh:#如果运动的幅度大于阈值
-                self.count = 0
+                self.count = 0 #计数器清零
                 net, inp = self.__context_encoder(inputs[:,[0]]) 
                 self.net, self.inp, self.fmap = net, inp, gmap 
                 # 打包数据，时间错，图像，内参，特征，context features，input features
                 self.video.append(tstamp, image[0], None, None, depth, intrinsics / 8.0, gmap, net[0], inp[0])
             else:
-                self.count += 1
+                self.count += 1 #否则一直累加计数器

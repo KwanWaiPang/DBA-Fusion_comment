@@ -15,9 +15,9 @@ from scipy.spatial.transform import Rotation
 
 class DBAFusionFrontend:
     def __init__(self, net, video, args):
-        self.video = video
+        self.video = video #所有的数据存放
         self.update_op = net.update #网络更新的操作
-        self.graph = CovisibleGraph(video, net.update, args=args) #创建一个图
+        self.graph = CovisibleGraph(video, net.update, args=args) #创建一个图（共时性的图）
 
         # local optimization window
         self.t0 = 0
