@@ -80,7 +80,7 @@ class DepthVideo:
         self.save_pkl = save_pkl
         self.upsample_flag = upsample
 
-        self.state = MultiSensorState()
+        self.state = MultiSensorState()#位姿估计的状态
         self.last_t0 = 0
         self.last_t1 = 0
         self.cur_graph = None
@@ -100,9 +100,9 @@ class DepthVideo:
         self.xyz_ref = []
         
         # extrinsics, need to be set in the main .py
-        self.Ti1c = None  # shape = (4,4)
-        self.Tbc = None   # gtsam.Pose3
-        self.tbg = None   # shape = (3)
+        self.Ti1c = None  # shape = (4,4) IMU-Camera Extrinsics
+        self.Tbc = None   # gtsam.Pose3  （gtsam.Pose3的形式表示IMU-Camera Extrinsics的位姿）
+        self.tbg = None   # shape = (3)  这个估计是gps到IMU的变换，但应该是不用的
 
         self.reinit = False
         self.vi_init_t1 = -1
@@ -111,6 +111,7 @@ class DepthVideo:
         self.gnss_init_time = 0.0
         self.ten0 = None
         
+        # 设置初始化的pose以及bias
         self.init_pose_sigma =np.array([0.1, 0.1, 0.0001, 0.0001,0.0001,0.0001])
         self.init_bias_sigma =np.array([1.0,1.0,1.0, 0.1, 0.1, 0.1])
 

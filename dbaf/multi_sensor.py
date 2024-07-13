@@ -29,6 +29,7 @@ class MultiSensorState:
         self.marg_factor = None
         self.set_imu_params()
     
+    # 设置imu的参数，bias等
     def set_imu_params(self, noise = None):
 
         # default

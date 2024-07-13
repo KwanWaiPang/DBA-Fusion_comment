@@ -47,7 +47,7 @@ class CovisibleGraph:
 
         self.far_threshold = args.far_threshold
         self.inac_range = args.inac_range
-        self.mask_threshold = args.mask_threshold
+        self.mask_threshold = args.mask_threshold #downweight too close edges，太靠近的边的权重减小
         self.img_count = 0
 
         self.skip_edge = args.skip_edge

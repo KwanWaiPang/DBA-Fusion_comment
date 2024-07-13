@@ -30,8 +30,8 @@ class DBAFusion:
         # frontend process（视觉的local BA，应该可以理解为用网络构建残差约束）
         self.frontend = DBAFusionFrontend(self.net, self.video, self.args)#传入的参数为网络、数据、args（参数）
 
-        self.pklpath = args.pklpath
-        self.upsample = args.upsample
+        self.pklpath = args.pklpath #保存的pkl文件的路径
+        self.upsample = args.upsample #参数参数是否进行上采样
 
     def load_weights(self, weights):
         """ load trained model weights """

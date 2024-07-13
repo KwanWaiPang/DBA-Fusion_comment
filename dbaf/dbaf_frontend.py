@@ -38,18 +38,18 @@ class DBAFusionFrontend:
         self.frontend_radius = args.frontend_radius
 
         ### DBAFusion
-        self.all_imu = None
+        self.all_imu = None #IMU数据
         self.cur_imu_ii = 0
         self.is_init = False
-        self.all_gnss = None
-        self.all_odo = None
-        self.all_gt = None
-        self.all_gt_keys = None
-        self.all_stamp = None
+        self.all_gnss = None  #GNSS数据
+        self.all_odo = None #轮式里程计数据
+        self.all_gt = None #所有的GT 时间戳+pose数据
+        self.all_gt_keys = None #所有的GT 时间戳
+        self.all_stamp = None #所有图像的时间戳 （应该是以秒为单位）
         self.cur_stamp_ii = 0
         self.visual_only = args.visual_only
         self.visual_only_init = False
-        self.translation_threshold = 0.0
+        self.translation_threshold = 0.0 #用于避免插入太近的关键帧，相当于插入关键帧的阈值
         self.active_window = args.active_window
         self.high_freq_output = True
         self.zupt = ('use_zupt' in args and args.use_zupt)

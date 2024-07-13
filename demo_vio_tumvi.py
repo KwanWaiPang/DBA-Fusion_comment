@@ -127,8 +127,12 @@ if __name__ == '__main__':
 
     parser.add_argument("--visual_only", type=int,default=0, help="wheter to disbale the IMU")
     parser.add_argument("--far_threshold", type=float, default=0.02, help="far pixels would be downweighted (unit: m^-1)")
+
+    # 用于frondend的参数
     parser.add_argument("--translation_threshold", type=float, default=0.2, help="avoid the insertion of too close keyframes (unit: m)")
+    # 用于CovisibleGraph的参数
     parser.add_argument("--mask_threshold", type=float, default=-1, help="downweight too close edges (unit: m)")
+
     parser.add_argument("--skip_edge", type = str, default ="[]", help="whether to add 'skip' edges in the graph (for example, [-4,-5,-6] relative to the oldest active frame)")
     parser.add_argument("--save_pkl", action="store_true")
     parser.add_argument("--pklpath", default="result.pkl", help="path to saved reconstruction")
@@ -146,26 +150,29 @@ if __name__ == '__main__':
     try:
         fp = open(args.gtpath,'rt') #打开真值轨迹文件
         while True:
-            line = fp.readline().strip()
-            if line == '':break
-            if line[0] == '#' : continue
-            line = re.sub('\s\s+',' ',line)
-            elem = line.split(',')
-            sod = float(elem[0])/1e9 #时间戳
-            if sod not in all_gt.keys():
-                all_gt[sod] ={}
+            line = fp.readline().strip() # 读取文件中的一行并去掉首尾的空白字符
+            if line == '':break  # 如果读到的是空行，表示文件结束，跳出循环
+            if line[0] == '#' : continue # 如果行的第一个字符是 #，表示这是注释行，跳过
+            line = re.sub('\s\s+',' ',line) # 用单个空格替换多个连续的空白字符
+            elem = line.split(',')  # 按逗号分隔行中的各个元素，得到一个列表
+            # 第一个元素是时间戳
+            sod = float(elem[0])/1e9 #时间戳（转换为秒）
+            if sod not in all_gt.keys(): # 如果时间戳还没有记录在字典中
+                all_gt[sod] ={} # 在字典中创建一个新的条目
+
             # 先获取四元数，然后把四元数转换为旋转矩阵
             R = quaternion.as_rotation_matrix(quaternion.from_float_array([float(elem[4]),\
                                                                            float(elem[5]),\
                                                                            float(elem[6]),\
                                                                            float(elem[7])]))
-            TTT = np.eye(4,4)
-            TTT[0:3,0:3] = R
-            # 第四列的前3行，分别是x,y,z
+            TTT = np.eye(4,4)  # 创建一个4x4的单位矩阵
+            TTT[0:3,0:3] = R  # 将旋转矩阵赋值给单位矩阵的左上角3x3子矩阵
+            # 第四列的前3行，分别是x,y,z（ 将位置数据赋值给单位矩阵的前三行的第四列）
             TTT[0:3,3] = np.array([ float(elem[1]), float(elem[2]), float(elem[3])])
+            # 将构建的转换矩阵存储在字典对应的时间戳条目中
             all_gt[sod]['T'] = TTT
-        all_gt_keys =sorted(all_gt.keys())#按时间戳排序
-        fp.close()
+        all_gt_keys =sorted(all_gt.keys()) # 获取所有的时间戳，并按升序排序
+        fp.close() # 关闭文件
     except:
         pass
 
@@ -192,34 +199,38 @@ if __name__ == '__main__':
             args.image_size = [image.shape[2], image.shape[3]]
             # 根据参数初始化DBAFusion类
             dbaf = DBAFusion(args)
-            # 设置IMU数据
-            dbaf.frontend.all_imu = all_imu
-            dbaf.frontend.all_gnss = []
-            dbaf.frontend.all_odo = []
+            # 设置前端中的数据
+            dbaf.frontend.all_imu = all_imu #设置IMU数据
+            dbaf.frontend.all_gnss = [] #设置GNSS数据为空
+            dbaf.frontend.all_odo = [] #设置里程计数据为空
             # 设置图像时间戳
             dbaf.frontend.all_stamp  = np.loadtxt(args.imagestamp,str,delimiter=',')
-            dbaf.frontend.all_stamp = dbaf.frontend.all_stamp[:,0].astype(np.float64)[None].transpose(1,0)/1e9
+            dbaf.frontend.all_stamp = dbaf.frontend.all_stamp[:,0].astype(np.float64)[None].transpose(1,0)/1e9 #转换为秒
             if len(all_gt) > 0:
                 # 设置真值数据
-                dbaf.frontend.all_gt = all_gt
+                dbaf.frontend.all_gt = all_gt #时间戳+位姿
                 # 将all_gt排序后的
-                dbaf.frontend.all_gt_keys = all_gt_keys
+                dbaf.frontend.all_gt_keys = all_gt_keys #时间戳
             
+            # 设置video数据包中的数据
             # IMU-Camera Extrinsics（设置IMU与camera的外参）
             dbaf.video.Ti1c = np.array(
                     [-0.9995250378696743, 0.029615343885863205, -0.008522328211654736, 0.04727988224914392,
                       0.0075019185074052044, -0.03439736061393144, -0.9993800792498829, -0.047443232143367084,
                      -0.02989013031643309, -0.998969345370175, 0.03415885127385616, -0.0681999605066297,
                      0.0, 0.0, 0.0, 1.0]).reshape([4,4])
-            dbaf.video.Ti1c = np.linalg.inv(dbaf.video.Ti1c)
-            dbaf.video.Tbc = gtsam.Pose3(dbaf.video.Ti1c)
+            dbaf.video.Ti1c = np.linalg.inv(dbaf.video.Ti1c) #矩阵求逆
+            dbaf.video.Tbc = gtsam.Pose3(dbaf.video.Ti1c) #将矩阵转换为gtsam.Pose3类型
             
             # IMU parameters（IMU一些参数的设置）
+            # 通过state（MultiSensorState类）设置优化器中的状态
             dbaf.video.state.set_imu_params((np.array([ 0.0003924 * 25,0.000205689024915 * 25, 0.004905 * 10, 0.000001454441043 * 5000])*1.0).tolist())
+            # 设置video数据包中初始化的pose以及bias
             dbaf.video.init_pose_sigma = np.array([0.1, 0.1, 0.0001, 0.0001,0.0001,0.0001])
             dbaf.video.init_bias_sigma = np.array([1.0,1.0,1.0, 1.0,1.0,1.0])
-            dbaf.frontend.translation_threshold = args.translation_threshold
-            dbaf.frontend.graph.mask_threshold  = args.mask_threshold
+            # 设置前端中的参数
+            dbaf.frontend.translation_threshold = args.translation_threshold #避免插入太近的关键帧
+            dbaf.frontend.graph.mask_threshold  = args.mask_threshold #downweight too close edges，太靠近的边的权重减小
 
         # 进行tracking
         dbaf.track(t, image, intrinsics=intrinsics)
