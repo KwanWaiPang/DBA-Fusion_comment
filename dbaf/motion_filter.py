@@ -52,8 +52,8 @@ class MotionFilter:
         """ features for correlation volume """
         return self.fnet(image).squeeze(0)
     
-    @torch.cuda.amp.autocast(enabled=True)
-    @torch.no_grad()
+    @torch.cuda.amp.autocast(enabled=True)#自动混合精度
+    @torch.no_grad()#不进行梯度计算
     def track(self, tstamp, image, depth=None, intrinsics=None):
         """ main update operation - run on every frame in video """
 

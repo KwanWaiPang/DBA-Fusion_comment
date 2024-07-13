@@ -232,7 +232,7 @@ if __name__ == '__main__':
             dbaf.frontend.translation_threshold = args.translation_threshold #避免插入太近的关键帧
             dbaf.frontend.graph.mask_threshold  = args.mask_threshold #downweight too close edges，太靠近的边的权重减小
 
-        # 进行tracking
+        # 进行tracking（传入的为时间、图片、内参）
         dbaf.track(t, image, intrinsics=intrinsics)
 
     if args.save_pkl:#保存结果

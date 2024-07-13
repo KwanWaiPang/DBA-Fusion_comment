@@ -33,12 +33,13 @@ class DBAFusion:
         self.pklpath = args.pklpath #保存的pkl文件的路径
         self.upsample = args.upsample #参数参数是否进行上采样
 
+    # 导入网络的权重（gwp_TODO 这部分后续修改是关键）
     def load_weights(self, weights):
         """ load trained model weights """
 
         print(weights)
         # 导入权重前先初始化了Droid-SLAM的网络
-        self.net = DroidNet()
+        self.net = DroidNet()#初始化网络
         state_dict = OrderedDict([
             (k.replace("module.", ""), v) for (k, v) in torch.load(weights).items()])
 
@@ -54,7 +55,7 @@ class DBAFusion:
         """ main thread - update map （进行tracking） """
 
         with torch.no_grad():# 不进行梯度计算
-            # check there is enough motion（同时做了深度特征的提取，获得的self.video算是打包好的数据）
+            # check there is enough motion（传入的为图片、时间和内参，计算是否有足够的motion，同时做了特征的提取并更新self.video中数据）
             self.filterx.track(tstamp, image, depth, intrinsics)
 
             # local bundle adjustment
