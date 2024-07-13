@@ -100,15 +100,17 @@ class CovisibleGraph:
         self.inp = None
 
     @torch.cuda.amp.autocast(enabled=True)
-    def add_factors(self, ii, jj, remove=False):
-        """ add edges to factor graph """
-        if not isinstance(ii, torch.Tensor):
+    def add_factors(self, ii, jj, remove=False): #起始节点的索引，结束节点的索引，以及是否remove掉的bool 变量
+        """ add edges to factor graph,向因子图中添加edges """
+
+        # 先确保ii和jj都是tensor类型，如果不是则转换为tensor类型
+        if not isinstance(ii, torch.Tensor): 
             ii = torch.as_tensor(ii, dtype=torch.long, device=self.device)
 
         if not isinstance(jj, torch.Tensor):
             jj = torch.as_tensor(jj, dtype=torch.long, device=self.device)
 
-        # remove duplicate edges
+        # remove duplicate edges(将重复的部分去掉)
         ii, jj = self.__filter_repeated_edges(ii, jj)
 
         if ii.shape[0] == 0:
@@ -341,16 +343,22 @@ class CovisibleGraph:
 
         self.age += 1
 
-    def add_neighborhood_factors(self, t0, t1, r=3):
+    def add_neighborhood_factors(self, t0, t1, r=3): #传入的参数为起始帧和结束帧，以及半径
         """ add edges between neighboring frames within radius r """
 
+        # 创建了两个网格 ii 和 jj，它们是从 t0 到 t1 范围内的所有帧索引的组合
+        # torch.meshgrid 接受多个一维的坐标数组，并返回一个坐标网格的张量，其中每个元素表示对应坐标上的点。
         ii, jj = torch.meshgrid(torch.arange(t0,t1), torch.arange(t0,t1))
+        # 将它们展平为一维张量，并将数据类型设置为 long，并放到gpu上
         ii = ii.reshape(-1).to(dtype=torch.long, device=self.device)
         jj = jj.reshape(-1).to(dtype=torch.long, device=self.device)
 
-        c = 1 if self.video.stereo else 0
+        c = 1 if self.video.stereo else 0 #如果是双目，c=1，否则为0。默认不是双目，故此为0
 
+        # 如果两个帧索引的绝对差值大于 c 且小于等于 r，则保留这些索引对。
         keep = ((ii - jj).abs() > c) & ((ii - jj).abs() <= r)
+
+        # 将筛选后的帧索引对传递进去，从而在这些帧之间添加边缘（也就是把edge添加到因子图中）。
         self.add_factors(ii[keep], jj[keep])
 
     

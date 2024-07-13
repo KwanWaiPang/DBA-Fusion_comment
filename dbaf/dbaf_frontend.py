@@ -20,8 +20,8 @@ class DBAFusionFrontend:
         self.graph = CovisibleGraph(video, net.update, args=args) #创建一个图（共时性的图）
 
         # local optimization window
-        self.t0 = 0
-        self.t1 = 0
+        self.t0 = 0 #起始帧的索引
+        self.t1 = 0 #结束帧的索引（应该也就是当前的输入数据的索引）
 
         # frontend variables
         self.is_initialized = False #是否初始化
@@ -816,8 +816,8 @@ class DBAFusionFrontend:
     def __initialize(self):
         """ initialize the SLAM system """
 
-        self.t0 = 0
-        self.t1 = self.video.counter.value
+        self.t0 = 0 #起始帧的索引
+        self.t1 = self.video.counter.value #结束帧的索引（当前帧）
 
         self.graph.add_neighborhood_factors(self.t0, self.t1, r=3)
 
