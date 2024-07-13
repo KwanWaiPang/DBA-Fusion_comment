@@ -131,3 +131,4 @@ ln -s /lib/x86_64-linux-gnu/dri/swrast_dri.so swrast_dri.so
 
 # 代码解读
 * demo_vio_tumvi.py
+* ```gwp_TODO```部分为改进代码时需要注意的！！！

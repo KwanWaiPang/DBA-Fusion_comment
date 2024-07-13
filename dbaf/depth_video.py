@@ -43,8 +43,8 @@ class DepthVideo:
         # current keyframe count
         self.counter = Value('i', 0)
         self.ready = Value('i', 0)
-        self.ht = ht = image_size[0]
-        self.wd = wd = image_size[1]
+        self.ht = ht = image_size[0] #图像的长宽
+        self.wd = wd = image_size[1] #图像的长宽
 
         ### state attributes，状态向量 ###
         self.tstamp = torch.zeros(buffer, device="cuda", dtype=torch.float64).share_memory_()

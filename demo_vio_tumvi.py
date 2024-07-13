@@ -102,9 +102,14 @@ if __name__ == '__main__':
     parser.add_argument("--buffer", type=int, default=80)
     parser.add_argument("--image_size", default=[240, 320])
 
+    # 在CovisibleGraph中会用到参数。定义为48，即构建的最多的约束的边数
     parser.add_argument("--max_factors", type=int, default=48, help="maximum active edges (which determines the GPU memory usage)")
+
     parser.add_argument("--beta", type=float, default=0.3, help="weight for translation / rotation components of flow")
+    
+    # 在MotionFilter会用到这个参数，用于判断是否添加关键帧（检查运动是否大于阈值）
     parser.add_argument("--filter_thresh", type=float, default=2.4, help="how much motion before considering new keyframe")
+
     parser.add_argument("--warmup", type=int, default=8, help="number of warmup frames")
     parser.add_argument("--keyframe_thresh", type=float, default=3.0, help="threshold to create a new keyframe")
     parser.add_argument("--frontend_thresh", type=float, default=16.0, help="add edges between frames whithin this distance")
@@ -116,7 +121,10 @@ if __name__ == '__main__':
     parser.add_argument("--backend_thresh", type=float, default=22.0)
     parser.add_argument("--backend_radius", type=int, default=2)
     parser.add_argument("--backend_nms", type=int, default=3)
+
+    # CovisibleGraph中会用到这个参数
     parser.add_argument("--upsample", action="store_true")
+
     parser.add_argument("--visual_only", type=int,default=0, help="wheter to disbale the IMU")
     parser.add_argument("--far_threshold", type=float, default=0.02, help="far pixels would be downweighted (unit: m^-1)")
     parser.add_argument("--translation_threshold", type=float, default=0.2, help="avoid the insertion of too close keyframes (unit: m)")

@@ -14,15 +14,15 @@ import matplotlib
 
 class CovisibleGraph:
     def __init__(self, video: DepthVideo, update_op, device="cuda:0", corr_impl="volume", args = None):
-        self.video = video
-        self.update_op = update_op
-        self.device = device
-        self.max_factors = args.max_factors
-        self.corr_impl = corr_impl
-        self.upsample = args.upsample
+        self.video = video#所有的数据都存放在video中
+        self.update_op = update_op #网络的更新操作
+        self.device = device #设备，默认为cuda:0
+        self.max_factors = args.max_factors #构建的最多的约束的边数
+        self.corr_impl = corr_impl #默认值
+        self.upsample = args.upsample #是否上采样？如果没这个参数输入，就是False
 
         # operator at 1/8 resolution
-        self.ht = ht = video.ht // 8
+        self.ht = ht = video.ht // 8 #这里的ht和wd是图像的高和宽的1/8，这是DROID输出的特征图的大小就是原图的1/8（gwp_TODO）
         self.wd = wd = video.wd // 8
 
         self.coords0 = pops.coords_grid(ht, wd, device=device)
