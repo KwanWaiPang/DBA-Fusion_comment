@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from lietorch import SE3
 from modules.corr import CorrBlock, AltCorrBlock
-import geom.projective_ops as pops
+import geom.projective_ops as pops #这是进行投影操作
 import matplotlib.pyplot as plt
 import cv2
 from depth_video import DepthVideo
@@ -21,11 +21,11 @@ class CovisibleGraph:
         self.corr_impl = corr_impl #默认值
         self.upsample = args.upsample #是否上采样？如果没这个参数输入，就是False
 
-        # operator at 1/8 resolution
+        # operator at 1/8 resolution （注意此处为网络提取的feature map的长宽）
         self.ht = ht = video.ht // 8 #这里的ht和wd是图像的高和宽的1/8，这是DROID输出的特征图的大小就是原图的1/8（gwp_TODO）
         self.wd = wd = video.wd // 8
 
-        self.coords0 = pops.coords_grid(ht, wd, device=device)
+        self.coords0 = pops.coords_grid(ht, wd, device=device) #生成tensor网格坐标，size为ht*wd
         self.ii = torch.as_tensor([], dtype=torch.long, device=device)
         self.jj = torch.as_tensor([], dtype=torch.long, device=device)
         self.age = torch.as_tensor([], dtype=torch.long, device=device)

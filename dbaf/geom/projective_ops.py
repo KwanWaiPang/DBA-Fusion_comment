@@ -8,7 +8,7 @@ MIN_DEPTH = 0.2
 def extract_intrinsics(intrinsics):
     return intrinsics[...,None,None,:].unbind(dim=-1)
 
-def coords_grid(ht, wd, **kwargs):
+def coords_grid(ht, wd, **kwargs):#第三个传递的参数只是device。这个函数的作用是生成网格坐标
     y, x = torch.meshgrid(
         torch.arange(ht).to(**kwargs).float(),
         torch.arange(wd).to(**kwargs).float())
