@@ -216,7 +216,7 @@ if __name__ == '__main__':
         # 进行tracking
         dbaf.track(t, image, intrinsics=intrinsics)
 
-    if args.save_pkl:
+    if args.save_pkl:#保存结果
         dbaf.save_vis_easy()
 
     dbaf.terminate()
