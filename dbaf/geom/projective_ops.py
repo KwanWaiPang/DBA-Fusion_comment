@@ -9,11 +9,15 @@ def extract_intrinsics(intrinsics):
     return intrinsics[...,None,None,:].unbind(dim=-1)
 
 def coords_grid(ht, wd, **kwargs):#第三个传递的参数只是device。这个函数的作用是生成网格坐标
-    y, x = torch.meshgrid(
-        torch.arange(ht).to(**kwargs).float(),
-        torch.arange(wd).to(**kwargs).float())
 
-    return torch.stack([x, y], dim=-1)
+    # 使用这些一维张量生成两个二维网格张量 y 和 x
+    # y 包含每行的纵坐标值，形状为 (ht, wd)。
+    # x 包含每列的横坐标值，形状为 (ht, wd)。
+    y, x = torch.meshgrid(
+        torch.arange(ht).to(**kwargs).float(), #生成从 0 到 ht-1 的一维张量，并转换为浮点数，放置在指定设备上。
+        torch.arange(wd).to(**kwargs).float()) #生成从 0 到 wd-1 的一维张量，并转换为浮点数，放置在指定设备上。
+
+    return torch.stack([x, y], dim=-1) #沿最后一个维度拼接，生成一个形状为 (ht, wd, 2) 的张量，其中每个位置包含该位置的 (x, y) 坐标。
 
 def iproj(disps, intrinsics, jacobian=False):
     """ pinhole camera inverse projection """

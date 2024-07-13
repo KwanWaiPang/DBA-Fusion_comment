@@ -159,12 +159,12 @@ class DroidNet(nn.Module):
         std = torch.as_tensor([0.229, 0.224, 0.225], device=images.device)
         images = images.sub_(mean[:, None, None]).div_(std[:, None, None])
 
-        fmaps = self.fnet(images)
-        net = self.cnet(images)
-        
-        net, inp = net.split([128,128], dim=2)
-        net = torch.tanh(net)
-        inp = torch.relu(inp)
+        fmaps = self.fnet(images)#获取feature matching
+        net = self.cnet(images)#获取context features
+            
+        net, inp = net.split([128,128], dim=2)#将context features分为两部分
+        net = torch.tanh(net)#tanh激活函数
+        inp = torch.relu(inp)#relu激活函数
         return fmaps, net, inp
 
 
