@@ -60,7 +60,7 @@ class DBAFusion:
             self.filterx.track(tstamp, image, depth, intrinsics)
 
             # local bundle adjustment
-            self.frontend()#应该是调用__call__函数，进行BA优化
+            self.frontend()#应该是调用DBAFusionFrontend的__call__函数，进行BA优化
 
     def terminate(self, stream=None):
         """ terminate the visualization process, return poses [t, q] """

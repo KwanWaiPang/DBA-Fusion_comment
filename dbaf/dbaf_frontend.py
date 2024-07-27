@@ -819,6 +819,7 @@ class DBAFusionFrontend:
         self.t0 = 0 #起始帧的索引
         self.t1 = self.video.counter.value #结束帧的索引（当前帧）
 
+        # self.graph为初始化类的时候创建的一个图（共时性的图）
         self.graph.add_neighborhood_factors(self.t0, self.t1, r=3)
 
         self.init_IMU()
@@ -855,7 +856,7 @@ class DBAFusionFrontend:
 
         # do initialization（先进行初始化，执行视觉与惯性的对齐）
         if not self.is_initialized and self.video.counter.value == self.warmup:#若未初始化，且视频计数器的值等于warmup，理解就是等待了多少帧之后才开始初始化
-            self.__initialize()
+            self.__initialize()#初始化，主要应该是进行视觉与惯性的对齐
         # 如果已经初始化了，do update（更新图）
         elif self.is_initialized and self.t1 < self.video.counter.value:
             self.__update()

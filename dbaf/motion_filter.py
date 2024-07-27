@@ -86,11 +86,12 @@ class MotionFilter:
             coords0 = pops.coords_grid(ht, wd, device=self.device)[None,None]#生成坐标网格，在前两个维度上增加两个维度。变为(1, 1, ht, wd, 2)
 
             corr = CorrBlock(self.fmap[None,[0]], gmap[None,[0]])(coords0) #关键帧和当前帧之间的相关运算 [None,[0]]即保留第一行之后进行unsqueeze(0)，
+            # 获取的为correlation feature
 
             # approximate flow magnitude using 1 update iteration
             # context features分为两部分，一部分为tanh激活（net）和另外一部分为relu激活（inp）
             # 通过更新以及相关运算获取delta
-            _, delta, weight = self.update(self.net[None], self.inp[None], corr)
+            _, delta, weight = self.update(self.net[None], self.inp[None], corr)#每次update传入的为hidden state，context features和correlation feature
 
             # check motion magnitue / add new frame to video
             if delta.norm(dim=-1).mean().item() > self.thresh:#如果运动的幅度大于阈值
