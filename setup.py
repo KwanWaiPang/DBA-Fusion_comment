@@ -4,11 +4,13 @@ from torch.utils.cpp_extension import BuildExtension, CUDAExtension
 import os.path as osp
 ROOT = osp.dirname(osp.abspath(__file__))
 
+# 将网络的cpp部分安装为python包的形式（类似pip），使得可以import。至于网络结构部分还是正常调用py
 setup(
     name='droid_backends',
     ext_modules=[
         CUDAExtension('droid_backends',
             include_dirs=[osp.join(ROOT, 'thirdparty/eigen')],
+            # 下面是droid需要的cpp文件
             sources=[
                 'src/droid.cpp', 
                 'src/droid_kernels.cu',
