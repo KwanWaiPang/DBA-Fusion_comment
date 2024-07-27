@@ -28,6 +28,7 @@ def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
     calib = np.loadtxt(calib, delimiter=" ")
     fx, fy, cx, cy = calib[:4]
 
+    # 获取内参矩阵
     K = np.eye(3)
     K[0,0] = fx
     K[0,2] = cx
@@ -40,9 +41,9 @@ def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
     Kn[1,1] = fy 
     Kn[1,2] = cy
 
-    if not enable_h5:
-        image_list = sorted(os.listdir(imagedir))[::stride]
-        image_stamps = np.loadtxt(imagestamp,str,delimiter=',')
+    if not enable_h5:#如果不是h5文件
+        image_list = sorted(os.listdir(imagedir))[::stride]#获取图像列表，并按名字排序，每隔stride取一个
+        image_stamps = np.loadtxt(imagestamp,str,delimiter=',')#读取时间戳
         image_dict = dict(zip(image_stamps[:,1],image_stamps[:,0]))
         for t, imfile in enumerate(image_list):
             image = cv2.imread(os.path.join(imagedir, imfile))
@@ -54,7 +55,7 @@ def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
             tt = float(image_dict[imfile]) /1e9
 
             h0, w0, _ = image.shape
-            h1 = int(h0 * np.sqrt((384 * 512) / (h0 * w0)))
+            h1 = int(h0 * np.sqrt((384 * 512) / (h0 * w0)))#按比例缩放（此处应该就是统一了尺寸图像为384*512了？）
             w1 = int(w0 * np.sqrt((384 * 512) / (h0 * w0)))
 
             image = cv2.resize(image, (w1, h1))
@@ -186,8 +187,8 @@ if __name__ == '__main__':
     tstamps = []
 
     """ Load images """
-    clahe = cv2.createCLAHE(2.0,tileGridSize=(8, 8)) #直方图均衡化
-    # 通过image_stream函数获取数据
+    clahe = cv2.createCLAHE(2.0,tileGridSize=(8, 8)) #读入图片时先进行直方图均衡化（初始化直方图均衡化的类）
+    # 通过image_stream函数获取数据，并通过tpdm来显示进度
     for (t, image, intrinsics) in tqdm(image_stream(args.imagedir, args.imagestamp, args.enable_h5,\
                                                      args.h5path, args.calib, args.stride)):
         # 对图像进行直方图均衡化

@@ -147,7 +147,7 @@ class DroidNet(nn.Module):
         super(DroidNet, self).__init__()
         self.fnet = BasicEncoder(output_dim=128, norm_fn='instance')# feature matching network
         self.cnet = BasicEncoder(output_dim=256, norm_fn='none')# context network
-        self.update = UpdateModule()
+        self.update = UpdateModule() #RNN update module
 
 
     def extract_features(self, images):
@@ -211,6 +211,7 @@ class DroidNet(nn.Module):
             for i in range(2):
                 Gs, disps = BA(target, weight, eta, Gs, disps, intrinsics, ii, jj, fixedp=2)
 
+            # 进行投影变换。GS为估算出来的pose
             coords1, valid_mask = pops.projective_transform(Gs, disps, intrinsics, ii, jj)
             residual = (target - coords1)
 

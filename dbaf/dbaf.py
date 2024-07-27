@@ -17,7 +17,7 @@ import pickle
 class DBAFusion:
     def __init__(self, args):
         super(DBAFusion, self).__init__()
-        self.load_weights(args.weights) # （导入网络的权重，并初始化DroidNet）load DroidNet weights
+        self.load_weights(args.weights) # （导入网络的权重，并初始化网络DroidNet）load DroidNet weights
         self.args = args
 
         # （此类应该是用于存放所有的数据的）store images, depth, poses, intrinsics (shared between processes)
@@ -51,6 +51,7 @@ class DBAFusion:
         self.net.load_state_dict(state_dict)
         self.net.to("cuda:0").eval()
 
+    # 进行tracking的主函数
     def track(self, tstamp, image, depth=None, intrinsics=None):
         """ main thread - update map （进行tracking） """
 
