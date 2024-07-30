@@ -69,7 +69,7 @@ class MotionFilter:
         inputs = image[None, :, [2,1,0]].to(self.device) / 255.0 #除以255.0，将像素值归一化到 [0, 1] 之间
         inputs = inputs.sub_(self.MEAN).div_(self.STDV) #减去均值，除以标准差，进一步归一化。
 
-        # extract features
+        # extract features（提取特征）
         gmap = self.__feature_encoder(inputs) #提取matching feature, fnet(获取feature matching，另外一个为context network)
 
         ### always add first frame to the depth video ###
