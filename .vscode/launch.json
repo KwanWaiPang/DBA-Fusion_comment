@@ -1,0 +1,46 @@
+{
+    // 使用 IntelliSense 了解相关属性。 
+    // 悬停以查看现有属性的描述。
+    // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "debug_dba",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "demo_vio_tumvi.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "2"
+            },
+            "args":[
+                "--imagedir=/home/gwp/DBA-Fusion/dataset/dataset-corridor1_512_16/mav0/cam0/data",
+                "--imagestamp=/home/gwp/DBA-Fusion/dataset/dataset-corridor1_512_16/mav0/cam0/data.csv",
+                "--imupath=/home/gwp/DBA-Fusion/dataset/dataset-corridor1_512_16/mav0/imu0/data.csv",
+                "--gtpath=/home/gwp/DBA-Fusion/dataset/dataset-corridor1_512_16/dso/gt_imu.csv",
+                "--enable_h5",
+                "--h5path=/home/gwp/DBA-Fusion/dataset/dataset-corridor1_512_16.h5",
+                "--resultpath=results/result_corridor1.txt",
+                "--weights=/home/gwp/DBA-Fusion/droid.pth", //这是droid的权重
+                // "--weights=/home/gwp/DPVO/dpvo.pth", // 下面是dpvo的权重
+                "--calib=calib/tumvi.txt",
+                "--stride=4",
+                "--max_factors=48",
+                "--active_window=12",
+                "--frontend_window=5",
+                "--frontend_radius=2",
+                "--frontend_nms=1",
+                "--far_threshold=0.02",
+                "--inac_range=3",
+                "--visual_only=0",
+                "--translation_threshold=0.2",
+                "--mask_threshold=-1.0",
+                "--skip_edge=[-4,-5,-6]",
+                // "--save_pkl",
+                // "--pklpath=results/corridor1.pkl",
+                // "--show_plot",
+            ]
+
+        }
+    ]
+}
