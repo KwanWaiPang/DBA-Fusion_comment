@@ -86,7 +86,7 @@ class DepthVideo:
         self.state = MultiSensorState()#位姿估计的状态
         self.last_t0 = 0
         self.last_t1 = 0
-        self.cur_graph = None
+        self.cur_graph = None #当前的gtsam维护的图
         self.cur_result = None
         self.marg_factor = None
         self.prior_factor = []
@@ -325,7 +325,7 @@ class DepthVideo:
             self.last_t1 = t1
 
     def ba(self, target, weight, eta, ii, jj, t0=1, t1=None, itrs=2, lm=1e-4, ep=0.1, motion_only=False):
-        """ dense bundle adjustment (DBA) """
+        """ 执行dense bundle adjustment (DBA) """
         with self.get_lock():
             if t1 is None:
                 t1 = max(ii.max().item(), jj.max().item()) + 1
@@ -465,12 +465,12 @@ class DepthVideo:
                     self.last_t0 = t0
                     self.last_t1 = t1
 
-                """ optimization """
+                """ optimization此处的优化应该是droid的后端优化 """
                 H = torch.zeros([(t1-t0)*6,(t1-t0)*6],dtype=torch.float64,device='cpu')
                 v = torch.zeros([(t1-t0)*6],dtype=torch.float64,device='cpu')
                 dx = torch.zeros([(t1-t0)*6],dtype=torch.float64,device='cpu') 
 
-                bacore = droid_backends.BACore()
+                bacore = droid_backends.BACore()#进行droid的后端优化
                 active_index    = torch.logical_and(ii>=t0,jj>=t0)
                 self.cur_ii     = ii[active_index]
                 self.cur_jj     = jj[active_index]
@@ -481,9 +481,10 @@ class DepthVideo:
                 bacore.init(self.poses, self.disps, self.intrinsics[0], self.disps_sens,
                     self.cur_target, self.cur_weight, self.cur_eta, self.cur_ii, self.cur_jj, t0, t1, itrs, lm, ep, motion_only)
 
-                self.cur_graph = gtsam.NonlinearFactorGraph()
+                self.cur_graph = gtsam.NonlinearFactorGraph() # gtsam维护的图
                 params = gtsam.LevenbergMarquardtParams()#;params.setMaxIterations(1)
 
+                # 下面开始添加gtsam的各种因子
                 # imu factor
                 if not self.ignore_imu:
                     for i in range(t0,t1):
@@ -491,14 +492,14 @@ class DepthVideo:
                             imu_factor = gtsam.gtsam.CombinedImuFactor(\
                                 X(i-1),V(i-1),X(i),V(i),B(i-1),B(i),\
                                 self.state.preintegrations[i-1])
-                            self.cur_graph.add(imu_factor)
+                            self.cur_graph.add(imu_factor)#把imu预积分添加
 
                 # prior factor
                 keys = self.prior_factor_map.keys()
                 for i in sorted(keys):
                     if i >= t0 and i < t1:
                         for iii in range(len(self.prior_factor_map[i])):
-                            self.cur_graph.push_back(self.prior_factor_map[i][iii])
+                            self.cur_graph.push_back(self.prior_factor_map[i][iii])#添加先验因子
                 
                 # marginalization factor
                 if self.marg_factor is not None:
