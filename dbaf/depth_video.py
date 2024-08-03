@@ -528,7 +528,7 @@ class DepthVideo:
                 """ multi-sensor DBA iterations """
                 for iter in range(2):
                     if iter > 0:
-                        self.cur_graph.resize(self.cur_graph.size()-1)
+                        self.cur_graph.resize(self.cur_graph.size()-1)#图的size原本为16，resize为15
                     bacore.hessian(H,v) # camera frame
                     Hgg = gtsam.BA2GTSAM(H,v,self.Tbc)
                     Hg = Hgg[0:(t1-t0)*6,0:(t1-t0)*6]
@@ -539,14 +539,14 @@ class DepthVideo:
                         initial.insert(X(i), self.state.wTbs[i]) # the indice need to be handled
                     initial_vis = copy.deepcopy(initial)
                     vis_factor = CustomHessianFactor(initial_vis,Hg,vg)
-                    self.cur_graph.push_back(vis_factor)
+                    self.cur_graph.push_back(vis_factor)#基于droid的结果构建视觉的因子
                     
                     if not self.ignore_imu:
                         for i in range(t0,t1):
                             initial.insert(B(i),self.state.bs[i])
                             initial.insert(V(i),self.state.vs[i])
 
-                    optimizer = gtsam.LevenbergMarquardtOptimizer(self.cur_graph, initial, params)
+                    optimizer = gtsam.LevenbergMarquardtOptimizer(self.cur_graph, initial, params)#使用gtsam进行优化
                     self.cur_result = optimizer.optimize()
 
                     # retraction and depth update
