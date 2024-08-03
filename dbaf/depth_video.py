@@ -494,7 +494,7 @@ class DepthVideo:
                                 self.state.preintegrations[i-1])
                             self.cur_graph.add(imu_factor)#把imu预积分添加
 
-                # prior factor
+                # prior factor(此先验因子图感觉像是imu传入的)
                 keys = self.prior_factor_map.keys()
                 for i in sorted(keys):
                     if i >= t0 and i < t1:
@@ -518,7 +518,7 @@ class DepthVideo:
                                           gtsam.noiseModel.Diagonal.Sigmas(np.array([1.0,1.0,5.0]))))
                             self.cur_graph.push_back(gnss_factor)
                 
-                # Odo factor
+                # Odo factor（轮式里程计）
                 for i in range(t0,t1):
                     if self.state.odo_valid[i]:
                         vb = self.state.odo_vel[i]

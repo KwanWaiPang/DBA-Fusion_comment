@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "debug_dba",
+            "name": "dba_fusion",
             "type": "debugpy",
             "request": "launch",
             "program": "demo_vio_tumvi.py",
