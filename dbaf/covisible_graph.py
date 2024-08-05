@@ -335,6 +335,9 @@ class CovisibleGraph:
                 weight[:,jj==max(jj)] /= 4.0
 
             damping = .2 * self.damping[torch.unique(ii)].contiguous() + EP
+            # 关于damping和upsample，在droid的批注中提到了这个效果几乎没有用
+            # We found this useless for VIO performance, thus disable it to save computation.
+            # Feel free to re-enable it.
 
             target = target.view(-1, ht, wd, 2).permute(0,3,1,2).contiguous()
             weight = weight.view(-1, ht, wd, 2).permute(0,3,1,2).contiguous()
