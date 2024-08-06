@@ -251,8 +251,8 @@ class DBAFusionFrontend:
             self.graph.update(None, None, use_inactive=True)
 
         self.rollup = False
-        if self.t1 > 65:
-            self.__rollup(30)
+        if self.t1 > 65:#大于65帧的时候，就开始回滚
+            self.__rollup(30)#每次回滚30帧
             print('rollup ',self.graph.ii)
             self.rollup = True
 
@@ -260,6 +260,7 @@ class DBAFusionFrontend:
 
         ## visualization/output
         poses = SE3(self.video.poses)
+        # 获取帧间距离
         d = self.video.distance([self.t1-3], [self.t1-2], beta=self.beta, bidirectional=True)
         TTT = np.matmul(poses[self.t1-1].cpu().inv().matrix(),np.linalg.inv(self.video.Ti1c))
         if self.video.imu_enabled or (self.visual_only and self.visual_only_init):
@@ -314,13 +315,13 @@ class DBAFusionFrontend:
                 plt.pause(0.1)
 
 
-        ## keyframe update
+        ## keyframe update（关键帧的更新）
         self.video.logger.info('keyframes %d' % self.graph.ii.shape[0])
         if self.t1 > 10:
             cam_translation =  torch.norm((poses[(self.t1-10):(self.t1-3)] * poses[self.t1-2].inv()[None]).translation()[:,0:3],dim=1)
         else:
             cam_translation =  torch.norm((poses[(self.t1-6):(self.t1-3)] * poses[self.t1-2].inv()[None]).translation()[:,0:3],dim=1)
-
+        # 如果帧间距离小于阈值就开始处理删除关键帧
         if (d.item() < self.keyframe_thresh or (self.video.imu_enabled and torch.sum(cam_translation < self.translation_threshold)>0)): # gnss
             self.video.logger.info('remove new frame!!!!!!!!!!!!1')
             self.graph.rm_keyframe(self.t1 - 2)
@@ -839,6 +840,7 @@ class DBAFusionFrontend:
             
         # torch.concat([self.graph.ii[None],self.graph.jj[None]]).T
         # self.video.normalize()
+        # 下面操作的目的是什么呢？
         self.video.poses[self.t1] = self.video.poses[self.t1-1].clone()
         self.video.disps[self.t1] = self.video.disps[self.t1-4:self.t1].mean()
         

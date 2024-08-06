@@ -160,7 +160,7 @@ class CovisibleGraph:
         """ drop edges from factor graph """
 
         # store estimated factors
-        if store:
+        if store:#将要删除的边存储到不活跃的边中
             self.ii_inac = torch.cat([self.ii_inac, self.ii[mask]], 0)
             self.jj_inac = torch.cat([self.jj_inac, self.jj[mask]], 0)
             self.target_inac = torch.cat([self.target_inac, self.target[:,mask]], 1)
