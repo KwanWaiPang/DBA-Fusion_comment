@@ -256,7 +256,7 @@ class CovisibleGraph:
                 ii, jj, target, weight = self.ii, self.jj, self.target, self.weight
 
             # Some real-time visualization for debugging
-            # 1) Disparity
+            # 1) Disparity（这是可视化而已~）
             if self.show_oldest_disparity:
                 disp_show_front = self.video.disps[self.ii[0]].cpu().numpy()
                 disp_show_front = cv2.resize(disp_show_front,[disp_show_front.shape[1]*8,disp_show_front.shape[0]*8],interpolation =  cv2.INTER_NEAREST)
@@ -314,13 +314,13 @@ class CovisibleGraph:
                 cv2.imshow('window',mmm)
 
             ## Tricks for better performance
-            # 1) downweight far points
+            # 1) downweight far points（相当于去掉一些mask）
             if self.far_threshold > 0 and self.video.imu_enabled:
                 disp_mask = (self.video.disps < self.far_threshold)
                 mask = disp_mask[ii, :, :]
                 weight[:, mask] /= 1000.0
             
-            # 2) downweight far points
+            # 2) downweight far points（对于距离远的点也去掉~）
             if self.mask_threshold > 0 and self.video.imu_enabled:
                 pose0 = SE3(self.video.poses[ii])
                 pose1 = SE3(self.video.poses[jj])
