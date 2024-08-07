@@ -276,7 +276,7 @@ __global__ void projective_transform_kernel(
 
     // load poses from global memory
     if (thread_id < 3) {
-      ti[thread_id] = poses[ix][thread_id];
+      ti[thread_id] = poses[ix][thread_id];//根据线程id与节点位置计算出对应的位姿(线程中的pose)
       tj[thread_id] = poses[jx][thread_id];
     }
 
@@ -346,8 +346,10 @@ __global__ void projective_transform_kernel(
     const float d = (Xj[2] < MIN_DEPTH) ? 0.0 : 1.0 / Xj[2];
     const float d2 = d * d;
 
+    // 光流的权重(每个点)
     float wu = (Xj[2] < MIN_DEPTH) ? 0.0 : .001 * weight[block_id][0][i][j];
     float wv = (Xj[2] < MIN_DEPTH) ? 0.0 : .001 * weight[block_id][1][i][j];
+    // 光流的速度(pixel)
     const float ru = target[block_id][0][i][j] - (fx * d * x + cx);
     const float rv = target[block_id][1][i][j] - (fy * d * y + cy);
 

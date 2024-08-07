@@ -360,12 +360,14 @@ class DBAFusionFrontend:
 
         ## try initializing VI/GNSS
         if self.t1 > self.vi_warmup and self.video.vi_init_t1 < 0:
-            self.init_VI()
-            if not self.visual_only:
+            self.init_VI()#调用VI初始化
+            if not self.visual_only:#如果visual_only为false
+                # 遍历所有的时间索引
                 for i in range(len(self.all_stamp)): # skip to next image
-                    if float(self.all_stamp[i][0]) < cur_t + 1e-6: continue
+                    if float(self.all_stamp[i][0]) < cur_t + 1e-6: #如果时间戳小于当前时间戳,就继续直到找到
+                        continue
                     else:
-                        self.cur_stamp_ii = i
+                        self.cur_stamp_ii = i #找到了就赋值
                         break
         if self.video.imu_enabled and self.video.gnss_init_time <= 0.0 and len(self.all_gnss)>0:
             self.init_GNSS()
