@@ -247,7 +247,7 @@ class DBAFusionFrontend:
         self.video.disps[self.t1-1] = torch.where(self.video.disps_sens[self.t1-1] > 0, 
            self.video.disps_sens[self.t1-1], self.video.disps[self.t1-1])
 
-        for itr in range(self.iters1):
+        for itr in range(self.iters1):#此处是进行非关键帧的更新操作~
             self.graph.update(None, None, use_inactive=True)
 
         self.rollup = False
@@ -324,7 +324,8 @@ class DBAFusionFrontend:
         # 如果帧间距离小于阈值就开始处理删除关键帧
         if (d.item() < self.keyframe_thresh or (self.video.imu_enabled and torch.sum(cam_translation < self.translation_threshold)>0)): # gnss
             self.video.logger.info('remove new frame!!!!!!!!!!!!1')
-            self.graph.rm_keyframe(self.t1 - 2)
+            self.graph.rm_keyframe(self.t1 - 2) #去掉self.t1 - 2这一帧。
+            # 判断的也是self.t1 - 2这一帧的帧间距离（[self.t1-3], [self.t1-2]）
 
             # merge preintegration[self.t1-2] and preintegration[self.t1-3]
             for iii in range(len(self.video.state.preintegrations_meas[self.t1-2])):
@@ -340,7 +341,7 @@ class DBAFusionFrontend:
             self.video.state.preintegrations.pop()
             self.video.state.preintegrations_meas.pop()
 
-            self.video.rm_new_gnss(self.t1-2)
+            self.video.rm_new_gnss(self.t1-2) #python pop是删掉末尾
             self.video.state.wTbs[self.t1-2] = self.video.state.wTbs[self.t1-1]; self.video.state.wTbs.pop()
             self.video.state.bs  [self.t1-2] = self.video.state.bs  [self.t1-1]; self.video.state.bs.pop()
             self.video.state.vs  [self.t1-2] = self.video.state.vs  [self.t1-1]; self.video.state.vs .pop()
