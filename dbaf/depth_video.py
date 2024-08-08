@@ -470,7 +470,7 @@ class DepthVideo:
                 v = torch.zeros([(t1-t0)*6],dtype=torch.float64,device='cpu')
                 dx = torch.zeros([(t1-t0)*6],dtype=torch.float64,device='cpu') 
 
-                bacore = droid_backends.BACore()#进行droid的后端优化
+                bacore = droid_backends.BACore()#进行droid的（应该是用于初始化droid 视觉BA分数，进而后续用于添加因子到gtsam）
                 active_index    = torch.logical_and(ii>=t0,jj>=t0)
                 self.cur_ii     = ii[active_index]
                 self.cur_jj     = jj[active_index]
