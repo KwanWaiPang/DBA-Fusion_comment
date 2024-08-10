@@ -296,7 +296,7 @@ torch::Tensor depth_filter(
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   // bundle adjustment kernels
-  m.def("ba", &ba, "bundle adjustment");
+  m.def("ba", &ba, "bundle adjustment");//执行droid的ba函数
   m.def("ba_extend", &ba_extend, "bundle adjustment (extended)");
   m.def("frame_distance", &frame_distance, "frame_distance");
   m.def("projmap", &projmap, "projmap");

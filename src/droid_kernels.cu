@@ -1411,13 +1411,13 @@ std::vector<torch::Tensor> ba_cuda(
     const bool motion_only)
 {
   auto opts = poses.options();
-  const int num = ii.size(0);
-  const int ht = disps.size(1);
-  const int wd = disps.size(2);
+  const int num = ii.size(0);//所有的边的数量（节点）
+  const int ht = disps.size(1);//图像的高度
+  const int wd = disps.size(2);//图像的宽度
 
-  torch::Tensor ts = torch::arange(t0, t1).to(torch::kCUDA);
-  torch::Tensor ii_exp = torch::cat({ts, ii}, 0);
-  torch::Tensor jj_exp = torch::cat({ts, jj}, 0);
+  torch::Tensor ts = torch::arange(t0, t1).to(torch::kCUDA);//时间戳
+  torch::Tensor ii_exp = torch::cat({ts, ii}, 0);//时间+节点ii
+  torch::Tensor jj_exp = torch::cat({ts, jj}, 0);//时间+节点jj
 
   std::tuple<torch::Tensor, torch::Tensor> kuniq = 
     torch::_unique(ii_exp, true, true);
@@ -1429,12 +1429,12 @@ std::vector<torch::Tensor> ba_cuda(
   torch::Tensor dz;
 
   // initialize buffers
-  torch::Tensor Hs = torch::zeros({4, num, 6, 6}, opts);
-  torch::Tensor vs = torch::zeros({2, num, 6}, opts);
+  torch::Tensor Hs = torch::zeros({4, num, 6, 6}, opts);//初始化的H矩阵
+  torch::Tensor vs = torch::zeros({2, num, 6}, opts);//速度
   torch::Tensor Eii = torch::zeros({num, 6, ht*wd}, opts);
   torch::Tensor Eij = torch::zeros({num, 6, ht*wd}, opts);
   torch::Tensor Cii = torch::zeros({num, ht*wd}, opts);
-  torch::Tensor wi = torch::zeros({num, ht*wd}, opts);
+  torch::Tensor wi = torch::zeros({num, ht*wd}, opts);//速度的权重
 
   for (int itr=0; itr<iterations; itr++) {
 
@@ -1830,7 +1830,7 @@ void BACore::init(torch::Tensor _poses,
   kk_exp = std::get<1>(kuniq); // 不重复元素的索引
 
   // initialize buffers
-  Hs = torch::zeros({4, num, 6, 6}, opts);
+  Hs = torch::zeros({4, num, 6, 6}, opts);//初始化的H矩阵
   vs = torch::zeros({2, num, 6}, opts);
   Eii = torch::zeros({num, 6, ht * wd}, opts);
   Eij = torch::zeros({num, 6, ht * wd}, opts);
@@ -1894,7 +1894,7 @@ void BACore::hessian(torch::Tensor H, torch::Tensor v)
       for(int i =0;i<H_accessor.size(0);i++)
       {
         for(int j =0;j<H_accessor.size(1);j++)
-          H_accessor[i][j] = Ad(i,j);
+          H_accessor[i][j] = Ad(i,j);//每个的结果叠加起来
         v_accessor[i] = vd(i);
       }
 }

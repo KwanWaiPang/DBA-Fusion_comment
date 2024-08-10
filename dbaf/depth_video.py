@@ -470,6 +470,7 @@ class DepthVideo:
                 v = torch.zeros([(t1-t0)*6],dtype=torch.float64,device='cpu')
                 dx = torch.zeros([(t1-t0)*6],dtype=torch.float64,device='cpu') 
 
+                # 初始化这个类一开始是空的，不做操作
                 bacore = droid_backends.BACore()#进行droid的（应该是用于初始化droid 视觉BA分数，进而后续用于添加因子到gtsam）
                 active_index    = torch.logical_and(ii>=t0,jj>=t0)
                 self.cur_ii     = ii[active_index]
@@ -478,6 +479,7 @@ class DepthVideo:
                 self.cur_weight = weight[active_index]
                 self.cur_eta    = eta[(t0-ii.min().item()):]
 
+                # 初始化的时候实际上只负责各种pose的赋值
                 bacore.init(self.poses, self.disps, self.intrinsics[0], self.disps_sens,
                     self.cur_target, self.cur_weight, self.cur_eta, self.cur_ii, self.cur_jj, t0, t1, itrs, lm, ep, motion_only)
 
@@ -529,7 +531,7 @@ class DepthVideo:
                 for iter in range(2):
                     if iter > 0:
                         self.cur_graph.resize(self.cur_graph.size()-1)#图的size原本为16，resize为15
-                    bacore.hessian(H,v) # camera frame
+                    bacore.hessian(H,v) # camera frame（真正开始计算BA的hessian矩阵以及速度v的）
                     Hgg = gtsam.BA2GTSAM(H,v,self.Tbc)
                     Hg = Hgg[0:(t1-t0)*6,0:(t1-t0)*6]
                     vg = Hgg[0:(t1-t0)*6,(t1-t0)*6]
