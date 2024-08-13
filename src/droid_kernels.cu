@@ -1464,7 +1464,7 @@ std::vector<torch::Tensor> ba_cuda(
         torch::cat({ii, jj}) - t0);
 
     if (motion_only) {
-      dx = A.solve(lm, ep);
+      dx = A.solve(lm, ep);//求解dx
 
       // update poses
       pose_retr_kernel<<<1, THREADS>>>(
