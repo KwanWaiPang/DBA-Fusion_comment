@@ -192,7 +192,7 @@ class DepthVideo:
     ### geometric operations ###
 
     @staticmethod
-    def format_indicies(ii, jj):
+    def format_indicies(ii, jj): #定义为静态方法，不需要实例化就可以调用，但看似外部是不可以调用的
         """ to device, long, {-1} """
 
         if not isinstance(ii, torch.Tensor):
@@ -562,6 +562,6 @@ class DepthVideo:
                             self.state.vs[i] = self.cur_result.atVector(V(i))
                         self.state.wTbs[i] = self.cur_result.atPose3(X(i))
                     dx = torch.tensor(gtsam.GTSAM2BA(dx,self.Tbc))
-                    dx_dz = bacore.retract(dx)
+                    dx_dz = bacore.retract(dx)#里面对pose与disp进行了更新应该是用于下次计算的
                 del bacore
             self.disps.clamp_(min=0.001)
