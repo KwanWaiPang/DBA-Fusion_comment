@@ -768,7 +768,8 @@ class DBAFusionFrontend:
         if disable_scale:
             s = 1.0
             
-        print('g,s:',g,s)
+        # print('g,s:',g,s)
+        print(f'\033[31m the calculate g {g} and scaler {s} \033[0m ')
         if math.fabs(np.linalg.norm(g) - 9.81) < 0.5 and s > 0:
             print('V-I successfully initialized!')
         
