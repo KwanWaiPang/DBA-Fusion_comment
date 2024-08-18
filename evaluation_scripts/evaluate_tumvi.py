@@ -117,7 +117,9 @@ if __name__ == '__main__':
     args.subcommand = 'tum'
     seq = args.seq
 
+    # args.ref_file = '/home/gwp/DBA-Fusion/dataset/dataset-%s_512_16/dso/gt_imu.csv' % seq
     args.ref_file = '/home/gwp/DBA-Fusion/dataset/dataset-%s_512_16/dso/gt_imu.csv' % seq
+    print(f"真值的轨迹：{args.ref_file}")
     # Convert GT format
     dd = np.loadtxt(args.ref_file,delimiter=',',comments='#')
     dd_new = np.copy(dd)
@@ -141,12 +143,13 @@ if __name__ == '__main__':
     args.plot_colormap_max_percentile = None
     args.ros_map_yaml = None
     args.plot = True
-    args.est_files = ['results/result_%s.txt' % seq]
+    args.est_files = ['results/result_%s.txt' % seq]# 估计的轨迹文件
     label_list = ['DBA-Fusion (M)']
     args.save_plot = False
     args.serialize_plot = False
     for iii in range(len(args.est_files)):
         args.est_file = args.est_files[iii]
+        print(f"估算的轨迹：{args.est_file}")
 
         if args.est_file.find('visual') != -1:
             args.correct_scale = True

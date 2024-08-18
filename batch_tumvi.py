@@ -39,8 +39,9 @@ for i in [\
     " --visual_only=0" +\
     " --translation_threshold=0.2" +\
     " --mask_threshold=-1.0" +\
-    " --skip_edge=[-4,-5,-6]" +\
-    " --save_pkl" +\
-    " --pklpath=results/%s.pkl"%i +\
-    " --show_plot",shell=True)
+    " --skip_edge=[-4,-5,-6]" ,shell=True)
+    # " --skip_edge=[-4,-5,-6]" +\
+    # " --save_pkl" +\
+    # " --pklpath=results/%s.pkl"%i +\
+    # " --show_plot",shell=True)
     p.wait()
