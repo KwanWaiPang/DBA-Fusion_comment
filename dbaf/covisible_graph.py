@@ -345,6 +345,7 @@ class CovisibleGraph:
             # Dense bundle adjustment
             self.video.ba(target, weight, damping, ii, jj, t0, t1, 
                 itrs=itrs, lm=1e-4, ep=0.1, motion_only=motion_only)
+            # print(f'after BA pose: {self.video.poses[self.video.counter.value-1]} in frame {self.video.counter.value-1}')
         
             if self.upsample:
                 self.video.upsample(torch.unique(self.ii), upmask)

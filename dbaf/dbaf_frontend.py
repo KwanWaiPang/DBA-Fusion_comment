@@ -357,7 +357,7 @@ class DBAFusionFrontend:
             for itr in range(self.iters2):
                 # print('b%d' % itr)
                 self.graph.update(None, None, use_inactive=True)
-
+        print(f"{[len(p) for p in self.video.state.preintegrations_meas]}")
         ## try initializing VI/GNSS
         if self.t1 > self.vi_warmup and self.video.vi_init_t1 < 0:
             self.init_VI()#调用VI初始化

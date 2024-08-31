@@ -40,7 +40,41 @@
                 // "--pklpath=results/corridor1.pkl",
                 // "--show_plot",
             ]
+        },
 
+        {
+            "name": "euroc_testing",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "demo_vio_euroc.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "2"
+            },
+            "args":[
+                "--imagedir=/home/gwp/Deep-EIO/dataset/mav0/cam0/data",
+                "--imagestamp=/home/gwp/Deep-EIO/dataset/mav0/cam0/data.csv",
+                "--imupath=/home/gwp/Deep-EIO/dataset/mav0/imu0/data.csv",
+                "--gtpath=/home/gwp/Deep-EIO/dataset/mav0/state_groundtruth_estimate0/data.csv",
+                "--resultpath=results/MH_01_easy.txt",
+                "--weights=/home/gwp/DBA-Fusion/droid.pth", //这是droid的权重
+                "--calib=calib/euroc.txt",
+                "--stride=2",
+                "--max_factors=48",
+                "--active_window=12",
+                "--frontend_window=5",
+                "--frontend_radius=2",
+                "--frontend_nms=1",
+                "--far_threshold=0.02",
+                "--inac_range=3",
+                "--visual_only=0",
+                "--translation_threshold=0.2",
+                "--mask_threshold=-1.0",
+                "--skip_edge=[-4,-5,-6]",
+                // "--save_pkl",
+                // "--pklpath=results/corridor1.pkl",
+                // "--show_plot",
+            ]
         }
     ]
 }
