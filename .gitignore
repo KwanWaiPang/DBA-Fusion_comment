@@ -157,6 +157,6 @@ figures/*.pdf
 
 # dataset/*.tar
 dataset/dataset-*
-results/*
+# results/*
 
 
