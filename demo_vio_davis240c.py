@@ -16,6 +16,41 @@ import math
 import quaternion
 import gtsam
 
+import matplotlib.pyplot as plt
+from evo.core import sync
+from evo.core.metrics import PoseRelation
+from evo.core.trajectory import PoseTrajectory3D
+from evo.tools import file_interface
+import evo.main_ape as main_ape
+
+# for the sever useer, we need to set the backend from "TkAgg" to "Agg"
+from evo.tools.settings import SETTINGS
+SETTINGS['plot_backend'] = 'Agg'
+from evo.tools import plot
+
+def plot_trajectory(pred_traj, gt_traj=None, title="", filename="", align=True, correct_scale=True):
+    assert isinstance(pred_traj, PoseTrajectory3D)
+
+    if gt_traj is not None:
+        assert isinstance(gt_traj, PoseTrajectory3D)
+        gt_traj, pred_traj = sync.associate_trajectories(gt_traj, pred_traj)
+
+        if align:
+            pred_traj.align(gt_traj, correct_scale=correct_scale)
+
+    plot_collection = plot.PlotCollection("PlotCol")
+    fig = plt.figure(figsize=(8, 8))
+    plot_mode = plot.PlotMode.xz # ideal for planar movement
+    ax = plot.prepare_axis(fig, plot_mode)
+    ax.set_title(title)
+    if gt_traj is not None:
+        plot.traj(ax, plot_mode, gt_traj, '--', 'gray', "Ground Truth")
+    plot.traj(ax, plot_mode, pred_traj, '-', 'blue', "Predicted")
+    plot_collection.add_figure("traj (error)", fig)
+    plot_collection.export(filename, confirm_overwrite=False)
+    plt.close(fig=fig)
+    print(f"Saved {filename}")
+
 def show_image(image):
     image = image.permute(1, 2, 0).cpu().numpy()
     cv2.imshow('image', image / 255.0)
@@ -44,7 +79,7 @@ def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
     if not enable_h5:#如果不是h5文件
         image_list = sorted(os.listdir(imagedir))[::stride]#获取图像列表，并按名字排序，每隔stride取一个
         # image_stamps = np.loadtxt(imagestamp,str,delimiter=',')#读取时间戳
-        image_stamps= np.loadtxt(imagestamp)#读取时间戳
+        image_stamps= np.loadtxt(imagestamp)[::stride]#读取时间戳（注意要跟上面一样跳时间戳）
         # image_dict = dict(zip(image_stamps[:,1],image_stamps[:,0]))
         for t, imfile in enumerate(image_list):
             image = cv2.imread(os.path.join(imagedir, imfile))
@@ -81,7 +116,7 @@ def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
 # 主函数
 if __name__ == '__main__':
 
-    print(f'\033[0;31;42m testing Euroc!!! \033[0m')
+    print(f'\033[0;31;42m testing davis240c!!! \033[0m')
 
     # 检查GPU是否可用，并打印GPU信息
     print(torch.cuda.device_count())
@@ -144,6 +179,9 @@ if __name__ == '__main__':
     parser.add_argument("--save_pkl", action="store_true")
     parser.add_argument("--pklpath", default="result.pkl", help="path to saved reconstruction")
     parser.add_argument("--show_plot", action="store_true", help="plot the trajectory during running")
+
+    parser.add_argument("--evaluate_flag", action="store_true", help="plot the trajectory during running")#是否进行评估
+    parser.add_argument("--result_pdf", type=str, default="result.pdf", help="")#结果pdf文件
     
     args = parser.parse_args()
     args.skip_edge = eval(args.skip_edge)
@@ -151,6 +189,16 @@ if __name__ == '__main__':
     args.stereo = False
     dbaf = None
     torch.multiprocessing.set_start_method('spawn')
+
+    # 使用三重引号 """ 来表示多行字符串
+    print(f"""imagedir: {args.imagedir} \n
+            imagestamp: {args.imagestamp} \n
+            imupath: {args.imupath} \n
+            gtpath: {args.gtpath} \n
+            resultpath: {args.resultpath} \n
+            calib: {args.calib} \n
+            result_pdf: {args.result_pdf} \n""")
+
 
     """ Load reference trajectory (for visualization) """
     all_gt ={}
@@ -228,7 +276,7 @@ if __name__ == '__main__':
              0.0121,  0.9998,  0.0093, 0.0007,
             -0.0064, -0.0092,  0.9999, 0.0342,
              0.0, 0.0, 0.0, 1.0]).reshape([4,4])
-            dbaf.video.Ti1c = np.linalg.inv(dbaf.video.Ti1c) #矩阵求逆
+            # dbaf.video.Ti1c = np.linalg.inv(dbaf.video.Ti1c) #矩阵求逆
             dbaf.video.Tbc = gtsam.Pose3(dbaf.video.Ti1c) #将矩阵转换为gtsam.Pose3类型
             
             # IMU parameters（IMU一些参数的设置）
@@ -248,3 +296,33 @@ if __name__ == '__main__':
         dbaf.save_vis_easy()
 
     dbaf.terminate()
+
+    if args.evaluate_flag:
+        #获取真值轨迹
+
+        traj_ref = file_interface.read_tum_trajectory_file(args.gtpath)
+        gtlentraj = traj_ref.get_infos()["path length (m)"]#获取轨迹长度
+
+        #轨迹的时间戳需要以秒为单位(原本是微妙)
+        traj_ref.timestamps = traj_ref.timestamps / 1e6
+
+        #进行验证
+        est_file=args.resultpath#获取结果文件（注意保存的时间应该已经转换为秒了~）
+        traj_est = file_interface.read_tum_trajectory_file(est_file)
+
+        traj_ref, traj_est = sync.associate_trajectories(traj_ref, traj_est)#同步轨迹
+
+        result = main_ape.ape(traj_ref, traj_est, 
+                pose_relation=PoseRelation.translation_part, align=True,n_to_align=1000, correct_scale=True)#注意n_to_align=1000
+        
+        print(f"\033[31m EVO结果：{result}\033[0m");
+        MPE = result.stats["mean"] / gtlentraj * 100 #注意单位为%
+        print(f"MPE is {MPE:.02f}")    
+        ate_score = result.stats["rmse"] #注意单位为m
+
+        res_str = f"\nATE[m]: {ate_score:.03f} | MPE[%/m]: {MPE:.02f}"
+
+        pdfname = args.result_pdf
+        plot_trajectory(traj_est, traj_ref, f"{res_str})",
+                        pdfname, align=True, correct_scale=True)
+        gwp_debug=1;
