@@ -150,5 +150,42 @@
                 // "--show_plot",
             ]
         },
+
+        {
+            "name": "stereo_hku",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "demo_vio_stereo_hku.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "2"
+            },
+            "args":[
+                "--imagedir=/media/lfl-data2/Steroe_HKU/HKU_aggressive_rotation/images_undistorted_left/",
+                "--imagestamp=/media/lfl-data2/Steroe_HKU/HKU_aggressive_rotation/raw_tss_imgs_ns_left.txt",
+                "--imupath=/media/lfl-data2/Steroe_HKU/HKU_aggressive_rotation/left_imu_data.csv",
+                "--gtpath=/media/lfl-data2/Steroe_HKU/HKU_aggressive_rotation/raw_gt_stamped_us.txt",
+                "--calib=/media/lfl-data2/Steroe_HKU/HKU_aggressive_rotation/calib_undist_left.txt",
+                "--resultpath=results/stereo_hku_HKU_aggressive_rotation.txt",
+                "--result_pdf=results/stereo_hku_HKU_aggressive_rotation.pdf",
+                "--weights=/home/gwp/DBA-Fusion/droid.pth", //这是droid的权重
+                "--stride=2",
+                "--max_factors=48",
+                "--active_window=12",
+                "--frontend_window=5",
+                "--frontend_radius=2",
+                "--frontend_nms=1",
+                "--far_threshold=0.02",
+                "--inac_range=3",
+                "--visual_only=0",
+                "--translation_threshold=0.2",
+                "--mask_threshold=-1.0",
+                // "--skip_edge=[-4,-5,-6]",
+                "--evaluate_flag",
+                // "--save_pkl",
+                // "--pklpath=results/corridor1.pkl",
+                // "--show_plot",
+            ]
+        },
     ]
 }
