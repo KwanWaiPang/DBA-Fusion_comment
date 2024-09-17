@@ -118,8 +118,11 @@ class DBAFusionFrontend:
 
         self.video.last_t0 -= roll
         self.video.last_t1 -= roll
-        self.video.cur_ii  -= roll
-        self.video.cur_jj  -= roll
+        # self.video.cur_ii  -= roll
+        # self.video.cur_jj  -= roll
+        if self.video.imu_enabled:#注意下面两个需要开启了IMU才有
+            self.video.cur_ii  -= roll
+            self.video.cur_jj  -= roll
         if self.video.imu_enabled:
             graph_temp = gtsam.NonlinearFactorGraph()
             for i in range(self.video.cur_graph.size()):

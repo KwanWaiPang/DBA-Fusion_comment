@@ -187,5 +187,42 @@
                 // "--show_plot",
             ]
         },
+
+        {
+            "name": "uzh_fpv_indoor_45",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "demo_vio_fpv_indoor_45.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "2"
+            },
+            "args":[
+                "--imagedir=/media/lfl-data2/UZH-FPV/indoor_45_2_davis_with_gt/images_undistorted/",
+                "--imagestamp=/media/lfl-data2/UZH-FPV/indoor_45_2_davis_with_gt/raw_images_timestamps_us.txt",
+                "--imupath=/media/lfl-data2/UZH-FPV/indoor_45_2_davis_with_gt/imu.txt",
+                "--gtpath=/media/lfl-data2/UZH-FPV/indoor_45_2_davis_with_gt/raw_stamped_groundtruth_us.txt",
+                "--calib=/media/lfl-data2/UZH-FPV/indoor_45_2_davis_with_gt/calib_undist.txt",
+                "--resultpath=results/fpv_indoor_45_2_davis_with_gt.txt",
+                "--result_pdf=results/fpv_indoor_45_2_davis_with_gt.pdf",
+                "--weights=/home/gwp/DBA-Fusion/droid.pth", //这是droid的权重
+                "--stride=2",
+                "--max_factors=48",
+                "--active_window=12",
+                "--frontend_window=5",
+                "--frontend_radius=2",
+                "--frontend_nms=1",
+                "--far_threshold=0.02",
+                "--inac_range=3",
+                "--visual_only=0",
+                "--translation_threshold=0.2",
+                "--mask_threshold=-1.0",
+                // "--skip_edge=[-4,-5,-6]",
+                "--evaluate_flag",
+                // "--save_pkl",
+                // "--pklpath=results/corridor1.pkl",
+                // "--show_plot",
+            ]
+        },
     ]
 }
