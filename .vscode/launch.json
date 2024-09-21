@@ -224,5 +224,42 @@
                 // "--show_plot",
             ]
         },
+
+        {
+            "name": "vector",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "demo_vio_vector.py",
+            "console": "integratedTerminal",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "1"
+            },
+            "args":[
+                "--imagedir=/media/lfl-data2/VECtor/corner_slow1/images_undistorted_left/",
+                "--imagestamp=/media/lfl-data2/VECtor/corner_slow1/raw_tss_imgs_ns_left.txt",
+                "--imupath=/media/lfl-data2/VECtor/corner_slow1/imu_data.csv",
+                "--gtpath=/media/lfl-data2/VECtor/corner_slow1/corner_slow1.synced.gt.txt",
+                "--calib=/media/lfl-data2/VECtor/corner_slow1/calib_undist_left.txt",
+                "--resultpath=results/vector_corner_slow1.txt",
+                "--result_pdf=results/vector_corner_slow1.pdf",
+                "--weights=/home/gwp/DBA-Fusion/droid.pth", //这是droid的权重
+                "--stride=2",
+                "--max_factors=48",
+                "--active_window=12",
+                "--frontend_window=5",
+                "--frontend_radius=2",
+                "--frontend_nms=1",
+                "--far_threshold=0.02",
+                "--inac_range=3",
+                "--visual_only=0",
+                "--translation_threshold=0.2",
+                "--mask_threshold=-1.0",
+                // "--skip_edge=[-4,-5,-6]",
+                "--evaluate_flag",
+                // "--save_pkl",
+                // "--pklpath=results/corridor1.pkl",
+                // "--show_plot",
+            ]
+        },
     ]
 }

@@ -81,7 +81,6 @@ def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
         # image_stamps = np.loadtxt(imagestamp,str,delimiter=',')#读取时间戳
         image_stamps= np.loadtxt(imagestamp)[::stride]#读取时间戳（注意要跟上面一样跳时间戳）
         # image_dict = dict(zip(image_stamps[:,1],image_stamps[:,0]))
-        assert len(image_list) == len(image_stamps)#确保图像和时间戳的数量一致
         for t, imfile in enumerate(image_list):
             image = cv2.imread(os.path.join(imagedir, imfile))
 
@@ -90,20 +89,20 @@ def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
                 image = cv2.remap(image, m1, m2, interpolation=cv2.INTER_LINEAR, borderMode=cv2.BORDER_CONSTANT)
 
             # tt = float(image_dict[imfile]) /1e6 #时间戳,转换为秒，读入的时间戳是微秒
-            tt = image_stamps[t] /1e6 #时间戳,转换为秒，读入的时间戳是微秒，t是索引
+            tt = image_stamps[t] /1e9 #时间戳,转换为秒，读入的时间戳是纳秒，t是索引
 
             h0, w0, _ = image.shape
-            # h1 = int(h0 * np.sqrt((384 * 512) / (h0 * w0)))#按比例缩放（此处应该就是统一了尺寸图像为384*512了？）
-            # w1 = int(w0 * np.sqrt((384 * 512) / (h0 * w0)))
+            h1 = int(h0 * np.sqrt((384 * 512) / (h0 * w0)))#按比例缩放（此处应该就是统一了尺寸图像为384*512了，注意vector数据集的图像尺寸太大了）
+            w1 = int(w0 * np.sqrt((384 * 512) / (h0 * w0)))
 
-            # image = cv2.resize(image, (w1, h1))
-            # image = image[:h1-h1%8, :w1-w1%8]
-            image=image[:h0-h0%8, :w0-w0%8]#裁剪图像，使得图像的长宽都是8的倍数
+            image = cv2.resize(image, (w1, h1))
+            image = image[:h1-h1%8, :w1-w1%8]
+            # image=image[:h0-h0%8, :w0-w0%8]#裁剪图像，使得图像的长宽都是8的倍数
             image = torch.as_tensor(image).permute(2, 0, 1)
 
             intrinsics = torch.as_tensor([fx, fy, cx, cy ])
-            # intrinsics[0::2] *= (w1 / w0)
-            # intrinsics[1::2] *= (h1 / h0)
+            intrinsics[0::2] *= (w1 / w0)
+            intrinsics[1::2] *= (h1 / h0)
 
             yield tt, image[None], intrinsics
     else:
@@ -117,7 +116,7 @@ def image_stream(imagedir, imagestamp, enable_h5, h5path, calib, stride):
 # 主函数
 if __name__ == '__main__':
 
-    print(f'\033[0;31;42m testing indoor_forward_uzh_fpv!!! \033[0m')
+    print(f'\033[0;31;42m testing Vector!!! \033[0m')
 
     # 检查GPU是否可用，并打印GPU信息
     print(torch.cuda.device_count())
@@ -192,9 +191,7 @@ if __name__ == '__main__':
     torch.multiprocessing.set_start_method('spawn')
 
     # 使用三重引号 """ 来表示多行字符串
-    print(f"""
-            \n
-            imagedir: {args.imagedir} \n
+    print(f"""imagedir: {args.imagedir} \n
             imagestamp: {args.imagestamp} \n
             imupath: {args.imupath} \n
             gtpath: {args.gtpath} \n
@@ -214,7 +211,7 @@ if __name__ == '__main__':
             line = re.sub('\s\s+',' ',line) # 用单个空格替换多个连续的空白字符
             elem = line.split(',')  # 按逗号分隔行中的各个元素，得到一个列表
             # 第一个元素是时间戳
-            sod = float(elem[0]) #时间戳（读入的时候是妙）
+            sod = float(elem[0])#/1e6 #时间戳（转换为秒，读入的时候是妙）
             if sod not in all_gt.keys(): # 如果时间戳还没有记录在字典中
                 all_gt[sod] ={} # 在字典中创建一个新的条目
 
@@ -235,9 +232,8 @@ if __name__ == '__main__':
         pass
 
     """ Load IMU data """
-    # all_imu = np.loadtxt(args.imupath,delimiter=',')
-    all_imu = np.loadtxt(args.imupath, delimiter=' ', usecols=range(1, 8))#去掉第0列序号
-    # all_imu[:,0] /= 1e9 #时间戳，转换为秒（读入已经是秒了～）
+    all_imu = np.loadtxt(args.imupath,delimiter=',')
+    all_imu[:,0] /= 1e9 #时间戳，读入为纳秒，转换为秒
     all_imu[:,1:4] *= 180/math.pi #角速度，转换为度
     # 线加速度不变
     #     
@@ -276,9 +272,9 @@ if __name__ == '__main__':
             # 设置video数据包中的数据
             # IMU-Camera Extrinsics（设置IMU与camera的外参）
             dbaf.video.Ti1c = np.array(
-            [0.9999711474430529, 0.0013817010649267755, -0.007469617365767657, 0.00018050225881571712,      
-            -0.0014085305353606873, 0.9999925720306121, -0.00358774655345255, -0.004316353415695194,
-             0.007464604688444933, 0.0035981642219379494, 0.9999656658561218, -0.027547385763471585,
+            [0.017248643674008135, -0.9998037138739959,    0.009747718459772736,  0.07733078169916466,      
+             0.012834636469124028, -0.009526963092989282, -0.999872246379971,    -0.016637889364465353,
+             0.9997688514842376,    0.017371548520172697,  0.01266779001636642,  -0.14481844113148515,
              0.0, 0.0, 0.0, 1.0]).reshape([4,4])
             dbaf.video.Ti1c = np.linalg.inv(dbaf.video.Ti1c) #矩阵求逆(由于传入的为IMU to camera的矩阵，所以需要求逆)
             dbaf.video.Tbc = gtsam.Pose3(dbaf.video.Ti1c) #将矩阵转换为gtsam.Pose3类型
@@ -292,7 +288,6 @@ if __name__ == '__main__':
             # 设置前端中的参数
             dbaf.frontend.translation_threshold = args.translation_threshold #避免插入太近的关键帧
             dbaf.frontend.graph.mask_threshold  = args.mask_threshold #downweight too close edges，太靠近的边的权重减小
-            dbaf.frontend.high_freq_output = False #是否输出高频率的数据
 
         # 进行tracking（传入的为时间、图片、内参）
         dbaf.track(t, image, intrinsics=intrinsics)
@@ -308,8 +303,8 @@ if __name__ == '__main__':
         traj_ref = file_interface.read_tum_trajectory_file(args.gtpath)
         gtlentraj = traj_ref.get_infos()["path length (m)"]#获取轨迹长度
 
-        #轨迹的时间戳需要以秒为单位(原本是微妙)
-        traj_ref.timestamps = traj_ref.timestamps / 1e6
+        #轨迹的时间戳需要以秒为单位(原本是妙)
+        traj_ref.timestamps = traj_ref.timestamps #/ 1e6
 
         #进行验证
         est_file=args.resultpath#获取结果文件（注意保存的时间应该已经转换为秒了~）
