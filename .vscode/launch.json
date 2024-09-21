@@ -229,7 +229,7 @@
             "name": "vector",
             "type": "debugpy",
             "request": "launch",
-            "program": "demo_vio_vector.py",
+            "program": "demo_vio_vector_small_scale.py",
             "console": "integratedTerminal",
             "env": {
                 "CUDA_VISIBLE_DEVICES": "1"
