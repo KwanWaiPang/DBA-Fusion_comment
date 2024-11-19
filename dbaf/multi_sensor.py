@@ -96,7 +96,8 @@ class MultiSensorState:
             self.preintegrations[-1].integrateMeasurement(\
                             measuredAcc, measuredOmega, t - self.cur_t)
         if t - self.cur_t < 0:
-            raise Exception("may not happen")
+            # raise Exception("may not happen")
+            return
         self.preintegrations_meas[-1].append([measuredAcc, measuredOmega, t - self.cur_t, t])
         # print('append_imu: ',measuredAcc,measuredOmega,t - self.cur_t,t)
         self.last_measuredAcc = measuredAcc
